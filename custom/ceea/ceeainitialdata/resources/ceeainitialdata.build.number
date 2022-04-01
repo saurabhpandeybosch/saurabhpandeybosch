@@ -1,0 +1,11 @@
+#Ant properties
+#Wed Mar 02 23:26:41 CET 2022
+version.api=2011
+vendor=hybris
+group.id=de.hybris.platform
+name=ceeainitialdata
+description=ceeainitialdata
+builddate=20220302 2323
+releasedate=20201119 1630
+version=2011.19
+module.name=platform-module
