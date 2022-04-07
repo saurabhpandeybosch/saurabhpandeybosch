@@ -538,9 +538,21 @@
 		<property name="itemCleanupHooks" ref="csTicketRetentionHooks"/>
 		<property name="ticketBusinessService" ref="ticketBusinessService"/>
 	</bean>
-	<bean id="upload3DImageProductService" class="de.hybris.ceea.facades.service.impl.Upload3DImageProductServiceImpl">
-          <property name="productService" ref="productService"/>
+	
+          
+	      <bean id="upload3DImageProductService" class="de.hybris.ceea.facades.service.impl.Upload3DImageProductServiceImpl">
+           
+            <property name="productService" ref="productService"/>
           <property name="mediaService" ref="mediaService"/>
-		  <property name="modelService" ref="modelService"/>
-     </bean>
+		<property name="modelService" ref="modelService"/>
+		<property name="eventService" ref="eventService"/>
+            </bean>
+	<!-- <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/> -->
+	
+	<bean id="ceea3DImageSubmitEventListner" class="de.hybris.ceea.core.event.Ceea3DImageSubmitEventListner"
+		  parent="abstractEventListener">
+		<property name="modelService" ref="modelService"/>
+		<property name="businessProcessService" ref="businessProcessService"/>
+		
+	</bean>
 </beans>

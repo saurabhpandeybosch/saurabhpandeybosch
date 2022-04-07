@@ -3,10 +3,12 @@
  */
 package de.hybris.ceea.facades.service.impl;
 
+import de.hybris.ceea.core.event.Ceea3DImageSubmitEvent;
 import de.hybris.ceea.facades.service.Upload3DImageProductService;
 import de.hybris.platform.core.model.media.MediaModel;
 import de.hybris.platform.core.model.product.ProductModel;
 import de.hybris.platform.product.ProductService;
+import de.hybris.platform.servicelayer.event.EventService;
 import de.hybris.platform.servicelayer.media.MediaService;
 import de.hybris.platform.servicelayer.model.ModelService;
 
@@ -33,6 +35,30 @@ public class Upload3DImageProductServiceImpl implements Upload3DImageProductServ
 	ModelService modelService;
 	MediaService mediaService;
 	ProductService productService;
+	private EventService eventService;
+
+	/**
+	 * @return the eventService
+	 */
+	public EventService getEventService()
+	{
+		return eventService;
+	}
+
+
+
+
+	/**
+	 * @param eventService
+	 *           the eventService to set
+	 */
+	public void setEventService(final EventService eventService)
+	{
+		this.eventService = eventService;
+	}
+
+
+
 
 	/**
 	 * @return the modelService
@@ -114,14 +140,21 @@ public class Upload3DImageProductServiceImpl implements Upload3DImageProductServ
 			mediaModel.setMime(file.getContentType());
 			modelService.save(mediaModel);
 			mediaService.setStreamForMedia(mediaModel, inputStream);
-			modelService.save(mediaModel);
+			/* modelService.save(mediaModel); */
+			modelService.refresh(mediaModel);
 
 			final ProductModel productmodel = productService.getProductForCode(code);
 
 			LOGGER.info("PRODUCTMODEL:" + productmodel);
 			productmodel.setAnnotation(annotation);
-			productmodel.setThreeDimensionalImage(mediaModel);
+			/* productmodel.setThreeDimensionalImage(mediaModel); */
 			modelService.save(productmodel);
+
+
+
+			final Ceea3DImageSubmitEvent event = new Ceea3DImageSubmitEvent(productmodel);
+			this.eventService.publishEvent(event);
+
 
 			return "File saved Successfully";
 
@@ -137,7 +170,4 @@ public class Upload3DImageProductServiceImpl implements Upload3DImageProductServ
 
 		return "Unable to save file";
 	}
-
-
 }
-

@@ -13,7 +13,6 @@ import de.hybris.platform.acceleratorstorefrontcommons.forms.ImportCSVSavedCartF
 import de.hybris.platform.acceleratorstorefrontcommons.forms.validation.ImportCSVSavedCartFormValidator;
 import de.hybris.platform.cms2.exceptions.CMSItemNotFoundException;
 import de.hybris.platform.cms2.model.pages.ContentPageModel;
-import com.ceea.storefront.controllers.ControllerConstants;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,6 +29,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.ceea.storefront.controllers.ControllerConstants;
 
 
 
@@ -73,10 +74,11 @@ public class ImportCSVPageController extends AbstractPageController
 	@ResponseBody
 	@RequestMapping(value = SAVED_CART_PATH_SEGMENT, method = RequestMethod.POST)
 	@RequireHardLogIn
-	public ResponseEntity<String> handleSavedCartImport(
-			@ModelAttribute("importCSVSavedCartForm") final ImportCSVSavedCartForm importCSVSavedCartForm,
-			final BindingResult bindingResult) throws IOException
+	public ResponseEntity<String> handleSavedCartImport(@ModelAttribute("importCSVSavedCartForm")
+	final ImportCSVSavedCartForm importCSVSavedCartForm, final BindingResult bindingResult) throws IOException
 	{
+		LOG.info("csv upload");
+		LOG.info("csv upload filename"+importCSVSavedCartForm.getCsvFile());
 		importCSVSavedCartFormValidator.validate(importCSVSavedCartForm, bindingResult);
 		if (bindingResult.hasErrors())
 		{

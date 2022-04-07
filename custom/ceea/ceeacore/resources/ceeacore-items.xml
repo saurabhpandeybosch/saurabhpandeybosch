@@ -115,7 +115,23 @@
                     </attribute>
                 </attributes>
             </itemtype>
+            <itemtype code="ThreeDImgBusinessProcess" extends="BusinessProcess" autocreate="true" generate="true">
+
+
+				<attributes>
+					<attribute qualifier="product" type="product">
+
+						<description>ThreeDImageAnnotation product.</description>
+						<modifiers />
+						<persistence type="property" />
+					</attribute>
+				</attributes>
+
+
+			</itemtype>
         </typegroup>
+        
+        
 
     </itemtypes>
 </items>

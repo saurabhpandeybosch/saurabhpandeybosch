@@ -1,7 +1,7 @@
 /*
  * ----------------------------------------------------------------
  * --- WARNING: THIS FILE IS GENERATED AND WILL BE OVERWRITTEN! ---
- * --- Generated at Mar 30, 2022, 10:38:35 AM                   ---
+ * --- Generated at Apr 6, 2022, 3:55:27 AM                     ---
  * ----------------------------------------------------------------
  */
 package com.ceea.core.jalo;
@@ -11,6 +11,7 @@ import com.ceea.core.jalo.ApparelProduct;
 import com.ceea.core.jalo.ApparelSizeVariantProduct;
 import com.ceea.core.jalo.ApparelStyleVariantProduct;
 import com.ceea.core.jalo.ElectronicsColorVariantProduct;
+import com.ceea.core.jalo.ThreeDImgBusinessProcess;
 import de.hybris.platform.jalo.GenericItem;
 import de.hybris.platform.jalo.Item;
 import de.hybris.platform.jalo.Item.AttributeMode;
@@ -192,6 +193,32 @@ public abstract class GeneratedCeeaCoreManager extends Extension
 	public ElectronicsColorVariantProduct createElectronicsColorVariantProduct(final Map attributeValues)
 	{
 		return createElectronicsColorVariantProduct( getSession().getSessionContext(), attributeValues );
+	}
+	
+	public ThreeDImgBusinessProcess createThreeDImgBusinessProcess(final SessionContext ctx, final Map attributeValues)
+	{
+		try
+		{
+			ComposedType type = getTenant().getJaloConnection().getTypeManager().getComposedType( CeeaCoreConstants.TC.THREEDIMGBUSINESSPROCESS );
+			return (ThreeDImgBusinessProcess)type.newInstance( ctx, attributeValues );
+		}
+		catch( JaloGenericCreationException e)
+		{
+			final Throwable cause = e.getCause();
+			throw (cause instanceof RuntimeException ?
+			(RuntimeException)cause
+			:
+			new JaloSystemException( cause, cause.getMessage(), e.getErrorCode() ) );
+		}
+		catch( JaloBusinessException e )
+		{
+			throw new JaloSystemException( e ,"error creating ThreeDImgBusinessProcess : "+e.getMessage(), 0 );
+		}
+	}
+	
+	public ThreeDImgBusinessProcess createThreeDImgBusinessProcess(final Map attributeValues)
+	{
+		return createThreeDImgBusinessProcess( getSession().getSessionContext(), attributeValues );
 	}
 	
 	@Override

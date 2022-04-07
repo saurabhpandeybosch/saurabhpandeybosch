@@ -1,7 +1,7 @@
 /*
  * ----------------------------------------------------------------
  * --- WARNING: THIS FILE IS GENERATED AND WILL BE OVERWRITTEN! ---
- * --- Generated at Mar 30, 2022, 10:38:35 AM                   ---
+ * --- Generated at Apr 6, 2022, 3:55:27 AM                     ---
  * ----------------------------------------------------------------
  */
 package com.ceea.core.constants;
@@ -21,6 +21,7 @@ public class GeneratedCeeaCoreConstants
 		public static final String APPARELSTYLEVARIANTPRODUCT = "ApparelStyleVariantProduct".intern();
 		public static final String ELECTRONICSCOLORVARIANTPRODUCT = "ElectronicsColorVariantProduct".intern();
 		public static final String SWATCHCOLORENUM = "SwatchColorEnum".intern();
+		public static final String THREEDIMGBUSINESSPROCESS = "ThreeDImgBusinessProcess".intern();
 	}
 	public static class Attributes
 	{
