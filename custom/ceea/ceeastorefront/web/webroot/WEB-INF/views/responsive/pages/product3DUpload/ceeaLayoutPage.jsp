@@ -11,7 +11,7 @@
 <spring:htmlEscape defaultHtmlEscape="true" />
 
 
-<c:url value="import/csv/saved-cart" var="submitURL"/>
+<c:url value="import/csv/uploadThreeDFile" var="submitURL"/>
 
 <template:page pageTitle="${pageTitle}">
 
@@ -20,17 +20,16 @@
 		class="ceeaBannerParagraph">
 		Hi, 
 			This is test page
-		<form:form method="post" action="${submitURL}" modelAttribute="importCSVSavedCartForm" enctype="multipart/form-data">
-		<input id="code" type="hidden" value="50000">
+		<form:form method="post" action="${submitURL}" modelAttribute="uploadForm" enctype="multipart/form-data">
+		Product Code:<br>
+    <input type="text" name="code"><br>
+  Annotation:<br>
+    <input type="text" name="annotation">
 		<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-		<input type="file" name="csvFile"/>
+		<input type="file" name="image"/>
 		<input type="submit" value="Upload"/>
 		 </form:form>
 		
 	</cms:pageSlot>
 </template:page>
-
-
-
-
 

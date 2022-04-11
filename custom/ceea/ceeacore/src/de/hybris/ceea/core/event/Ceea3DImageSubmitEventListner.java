@@ -3,11 +3,14 @@
  */
 package de.hybris.ceea.core.event;
 
+import de.hybris.platform.core.model.product.ProductModel;
 import de.hybris.platform.processengine.BusinessProcessService;
 import de.hybris.platform.servicelayer.event.impl.AbstractEventListener;
 import de.hybris.platform.servicelayer.model.ModelService;
 
 import org.apache.log4j.Logger;
+
+import com.ceea.core.model.ThreeDImgBusinessProcessModel;
 
 
 /**
@@ -59,6 +62,12 @@ public class Ceea3DImageSubmitEventListner extends AbstractEventListener<Ceea3DI
 		{
 			LOG.debug("Received Ceea3DImageSubmitEvent..");
 		}
+		final ProductModel product = event.getProductModel();
+		final ThreeDImgBusinessProcessModel businessProcess = (ThreeDImgBusinessProcessModel) businessProcessService.createProcess(
+				"threeDImgBusinessProcess-" + product.getCode() + "-" + System.currentTimeMillis(), "threeDImgBusinessProcess");
+		businessProcess.setProduct(product);
+		modelService.save(businessProcess);
+		businessProcessService.startProcess(businessProcess);
 		LOG.info("onEvent method got called");
 	}
 

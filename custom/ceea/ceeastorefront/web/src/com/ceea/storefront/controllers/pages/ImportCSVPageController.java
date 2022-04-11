@@ -3,6 +3,7 @@
  */
 package com.ceea.storefront.controllers.pages;
 
+import de.hybris.ceea.facades.Custom3DFacade;
 import de.hybris.platform.acceleratorfacades.cartfileupload.SavedCartFileUploadFacade;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.RequireHardLogIn;
 import de.hybris.platform.acceleratorstorefrontcommons.breadcrumb.ResourceBreadcrumbBuilder;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.ceea.storefront.common.form.UploadForm;
 import com.ceea.storefront.controllers.ControllerConstants;
 
 
@@ -41,6 +43,8 @@ import com.ceea.storefront.controllers.ControllerConstants;
 @RequestMapping("/import/csv")
 public class ImportCSVPageController extends AbstractPageController
 {
+	@Resource
+	private Custom3DFacade custom3DFacade;
 	private static final String SAVED_CART_PATH_SEGMENT = "/saved-cart";
 	private static final String IMPORT_CSV_FILE_MAX_SIZE_BYTES_KEY = "import.csv.file.max.size.bytes";
 	private static final String IMPORT_CSV_SAVED_CART_CMS_PAGE = "importCSVSavedCartPage";
@@ -107,4 +111,28 @@ public class ImportCSVPageController extends AbstractPageController
 
 		}
 	}
+	
+	private static final String UPLOAD_THREED_FILE = "/uploadThreeDFile";
+
+
+
+			@ResponseBody
+			@RequestMapping(value = UPLOAD_THREED_FILE, method = RequestMethod.POST)
+
+			public String uploadThreeDFile(@ModelAttribute("uploadForm")
+			final UploadForm uploadForm, final BindingResult bindingResult) throws IOException
+			{
+				LOG.info("this is product code:" + uploadForm.getCode());
+				LOG.info("This is multifile " + uploadForm.getAnnotation());
+				LOG.info("file name" + uploadForm.getImage().getOriginalFilename());
+				//final String setProduct3DImageByCode = custome3DFacade.getProductByCode(code, image, annotation);
+
+
+
+				return custom3DFacade.setProduct3DImageByCode(uploadForm.getCode(), uploadForm.getImage(), uploadForm.getAnnotation());
+				//return "true";
+
+
+
+			}
 }

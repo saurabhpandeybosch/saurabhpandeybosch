@@ -14,10 +14,9 @@
 
 	
 
-	<bean id="ThreeDImgBusinessProcessAction" class="de.hybris.ceea.fulfilmentprocess.actions.order.ThreeDImgBusinessProcessAction"  abstract="true" parent="abstractAction">
-		<!--<property name="timeService" ref="timeService" />-->
+	<bean id="threeDImgBusinessProcessAction" class="de.hybris.ceea.fulfilmentprocess.actions.order.AbstractOrderAction" abstract="true" parent="abstractAction">
+		<property name="timeService" ref="timeService" />
 	</bean>
-
 	
 
 </beans>

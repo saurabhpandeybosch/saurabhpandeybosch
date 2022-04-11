@@ -1,7 +1,7 @@
 /*
  * ----------------------------------------------------------------
  * --- WARNING: THIS FILE IS GENERATED AND WILL BE OVERWRITTEN! ---
- * --- Generated at Apr 6, 2022, 3:55:27 AM                     ---
+ * --- Generated at Apr 8, 2022, 4:12:40 AM                     ---
  * ----------------------------------------------------------------
  */
 package com.ceea.core.constants;

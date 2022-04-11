@@ -113,11 +113,13 @@
 		<property name="businessProcessService" ref="businessProcessService"/>
 		<property name="sessionService" ref="sessionService"/>
 	</bean>
-<!-- 
-<bean id="ThreeDImgBusinessProcessActionResource" class="de.hybris.ceea.processengine.definintion.ProcessDefinitionResource">
-		<property name="resource" value="classpath:/ceeaFulfilmentprocess/process/ThreeDImgBusinessProcess-process.xml"/>
+
+
+	<!--<bean id="threeDImgBusinessProcessDefinitionResource" class="de.hybris.platform.processengine.definition.ProcessDefinitionResource">
+		<property name="resource" value="classpath:/ceeaFulfilmentprocess/process/ThreeDImgBusinessProcess-process.xml" />
 	</bean>
-<import resource="ceeaFulfilmentprocess/process/ThreeDImgBusinessprocess-process.spring.xml" />
--->
+
+	Process Actions 
+	<import resource="ceeaFulfilmentprocess/process/ThreeDImgBusinessprocess-process.spring.xml" />-->
 
 </beans>

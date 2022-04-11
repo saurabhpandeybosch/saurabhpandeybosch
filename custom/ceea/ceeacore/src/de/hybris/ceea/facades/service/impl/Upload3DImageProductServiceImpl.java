@@ -135,19 +135,22 @@ public class Upload3DImageProductServiceImpl implements Upload3DImageProductServ
 		try (final InputStream inputStream = file.getInputStream())
 		{
 			final MediaModel mediaModel = modelService.create(MediaModel.class);
+
+			mediaModel.setCode(code + "-" + System.currentTimeMillis());
 			mediaModel.setRealFileName(file.getOriginalFilename());
-			//final MediaModel mediaModel = mediaService.getMedia(code);
 			mediaModel.setMime(file.getContentType());
+
 			modelService.save(mediaModel);
 			mediaService.setStreamForMedia(mediaModel, inputStream);
-			/* modelService.save(mediaModel); */
+			modelService.save(mediaModel);
 			modelService.refresh(mediaModel);
 
 			final ProductModel productmodel = productService.getProductForCode(code);
 
-			LOGGER.info("PRODUCTMODEL:" + productmodel);
+			LOGGER.info("PRODUCTMODEL CODE:" + productmodel.getCode());
+			LOGGER.info("PRODUCTMODEL:" + productmodel.getCode());
 			productmodel.setAnnotation(annotation);
-			/* productmodel.setThreeDimensionalImage(mediaModel); */
+			productmodel.setThreeDimensionalImage(mediaModel);
 			modelService.save(productmodel);
 
 
@@ -170,4 +173,12 @@ public class Upload3DImageProductServiceImpl implements Upload3DImageProductServ
 
 		return "Unable to save file";
 	}
+
+
+
+
+
+
+
 }
+

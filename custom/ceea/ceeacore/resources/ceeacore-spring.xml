@@ -555,4 +555,16 @@
 		<property name="businessProcessService" ref="businessProcessService"/>
 		
 	</bean>
+	
+	<bean id="threeDImgBusinessProcessDefinitionResource" class="de.hybris.platform.processengine.definition.ProcessDefinitionResource">
+		<property name="resource" value="classpath:/ceeacore/processes/threeDImgBusinessProcess-process.xml" />
+	</bean>
+
+	<!-- Process Actions -->
+	<!--<import resource="ceeacore/processes/threeDImgBusinessprocess-process.spring.xml" />
+-->
+	  <alias name="threeDImgBusinessProcessAction" alias="threeDImgBusinessProcessAction"/>
+	<bean id="threeDImgBusinessProcessAction" class="com.ceea.core.actions.ThreeDImgBusinessProcessAction"  parent="abstractAction">
+	</bean>
+
 </beans>

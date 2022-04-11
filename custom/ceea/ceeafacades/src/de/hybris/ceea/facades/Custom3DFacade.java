@@ -15,4 +15,5 @@ public interface Custom3DFacade
 
 	String setProduct3DImageByCode(String code, MultipartFile file, String annotation);
 
+
 }
