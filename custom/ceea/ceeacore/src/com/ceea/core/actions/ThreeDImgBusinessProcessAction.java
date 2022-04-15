@@ -10,14 +10,17 @@ import de.hybris.platform.servicelayer.media.MediaService;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.util.Collection;
 
 import javax.annotation.Resource;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
@@ -131,6 +134,8 @@ public class ThreeDImgBusinessProcessAction extends AbstractSimpleDecisionAction
 					StringUtils.EMPTY);
 			final RestTemplate restTemplate = new RestTemplate();
 			final ResponseEntity<String> response = restTemplate.postForEntity(serverUrl, requestEntity, String.class);
+			LOG.info("response status code ::" + response.getStatusCode());
+			LOG.info("response status body ::" + response.getBody());
 			sendData = true;
 		}
 		catch (final Exception ex)
@@ -170,19 +175,28 @@ public class ThreeDImgBusinessProcessAction extends AbstractSimpleDecisionAction
 		boolean sendData = false;
 		try
 		{
-			final HttpHeaders headers = new HttpHeaders();
+			final HttpHeaders headers = createHeaders();
 			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 			final MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
 			final Collection<File> files = mediaService.getFiles(product.getThreeDimensionalImage());
-			for (final File file : files)
-			{
-				body.add("file", file);
-			}
+			final File sendFile = files.stream().findFirst().get();
+			final MultiValueMap<String, String> fileMap = new LinkedMultiValueMap<>();
+			final ContentDisposition contentDisposition = ContentDisposition.builder("form-data").name("file")
+					.filename(product.getThreeDimensionalImage().getRealFileName()).build();
+
+			fileMap.add(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString());
+			final HttpEntity<byte[]> fileEntity = new HttpEntity<>(Files.readAllBytes(sendFile.toPath()), fileMap);
+			body.add("file", fileEntity);
+
 			final HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 			final String serverUrl = configurationService.getConfiguration().getString("ceea.api.image.upload.webservice.url",
 					StringUtils.EMPTY);
 			final RestTemplate restTemplate = new RestTemplate();
-			final ResponseEntity<String> response = restTemplate.postForEntity(serverUrl, requestEntity, String.class);
+			final ResponseEntity<String> response = restTemplate.exchange(serverUrl + product.getCode(), HttpMethod.POST,
+					requestEntity, String.class);
+
+			LOG.info("response status code ::" + response.getStatusCode());
+			LOG.info("response status body ::" + response.getBody());
 			sendData = true;
 		}
 		catch (final Exception ex)
