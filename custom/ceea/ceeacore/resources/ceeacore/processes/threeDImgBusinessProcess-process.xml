@@ -2,8 +2,16 @@
 <!--
  Copyright (c) 2019 SAP SE or an SAP affiliate company. All rights reserved.
 -->
-<process xmlns="http://www.hybris.de/xsd/processdefinition" start="threeDImgBusinessProcessAction" name="threeDImgBusinessProcess" processClass="com.ceea.core.model.ThreeDImgBusinessProcessModel">
+<process xmlns="http://www.hybris.de/xsd/processdefinition" start="ceeaProductSendAction" name="threeDImgBusinessProcess" processClass="com.ceea.core.model.ThreeDImgBusinessProcessModel">
 
+	<action id="ceeaProductSendAction" bean="ceeaProductSendAction">
+		<transition name="OK" to="ceeaAnnotationSendAction" />
+		<transition name="NOK" to="error" />
+	</action>
+	<action id="ceeaAnnotationSendAction" bean="ceeaAnnotationSendAction">
+		<transition name="OK" to="threeDImgBusinessProcessAction" />
+		<transition name="NOK" to="error" />
+	</action>
 	<action id="threeDImgBusinessProcessAction" bean="threeDImgBusinessProcessAction">
 		<transition name="OK" to="success" />
 		<transition name="NOK" to="error" />

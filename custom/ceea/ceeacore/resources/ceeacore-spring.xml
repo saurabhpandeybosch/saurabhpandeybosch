@@ -563,8 +563,13 @@
 	<!-- Process Actions -->
 	<!--<import resource="ceeacore/processes/threeDImgBusinessprocess-process.spring.xml" />
 -->
-	  <alias name="threeDImgBusinessProcessAction" alias="threeDImgBusinessProcessAction"/>
-	<bean id="threeDImgBusinessProcessAction" class="com.ceea.core.actions.ThreeDImgBusinessProcessAction"  parent="abstractAction">
-	</bean>
+	<alias name="threeDImgBusinessProcessAction" alias="threeDImgBusinessProcessAction"/>
+	<bean id="threeDImgBusinessProcessAction" class="com.ceea.core.actions.ThreeDImgBusinessProcessAction"  parent="abstractAction"/>
+	
+	<alias name="ceeaAnnotationSendAction" alias="ceeaAnnotationSendAction"/>
+	<bean id="ceeaAnnotationSendAction" class="com.ceea.core.actions.CeeaAnnotationSendAction"  parent="abstractAction"/>
+	
+	<alias name="ceeaProductSendAction" alias="ceeaProductSendAction"/>
+	<bean id="ceeaProductSendAction" class="com.ceea.core.actions.CeeaProductSendAction"  parent="abstractAction"/>
 
 </beans>

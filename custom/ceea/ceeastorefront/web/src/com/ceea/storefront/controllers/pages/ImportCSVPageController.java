@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.ceea.storefront.common.form.UploadForm;
+import com.ceea.storefront.common.form.validation.ImportImageSavedCartFormValidator;
 import com.ceea.storefront.controllers.ControllerConstants;
 
 
@@ -56,6 +57,9 @@ public class ImportCSVPageController extends AbstractPageController
 
 	@Resource(name = "importCSVSavedCartFormValidator")
 	private ImportCSVSavedCartFormValidator importCSVSavedCartFormValidator;
+
+	@Resource(name = "importImageSavedCartFormValidator")
+	private ImportImageSavedCartFormValidator importImageSavedCartFormValidator;
 
 	@Resource(name = "savedCartFileUploadFacade")
 	private SavedCartFileUploadFacade savedCartFileUploadFacade;
@@ -82,7 +86,7 @@ public class ImportCSVPageController extends AbstractPageController
 	final ImportCSVSavedCartForm importCSVSavedCartForm, final BindingResult bindingResult) throws IOException
 	{
 		LOG.info("csv upload");
-		LOG.info("csv upload filename"+importCSVSavedCartForm.getCsvFile());
+		LOG.info("csv upload filename" + importCSVSavedCartForm.getCsvFile());
 		importCSVSavedCartFormValidator.validate(importCSVSavedCartForm, bindingResult);
 		if (bindingResult.hasErrors())
 		{
@@ -111,28 +115,46 @@ public class ImportCSVPageController extends AbstractPageController
 
 		}
 	}
-	
-	private static final String UPLOAD_THREED_FILE = "/uploadThreeDFile";
+
+	private static final String CEEA_CMS_PAGE = "/uploadThreeDFile";
 
 
 
-			@ResponseBody
-			@RequestMapping(value = UPLOAD_THREED_FILE, method = RequestMethod.POST)
+	@ResponseBody
+	@RequestMapping(value = CEEA_CMS_PAGE, method = RequestMethod.POST)
 
-			public String uploadThreeDFile(@ModelAttribute("uploadForm")
-			final UploadForm uploadForm, final BindingResult bindingResult) throws IOException
+	public ResponseEntity<String> uploadThreeDFile(@ModelAttribute("uploadForm")
+	final UploadForm uploadForm, final BindingResult bindingResult) throws IOException
+	{
+
+		importImageSavedCartFormValidator.validate(uploadForm, bindingResult);
+		LOG.info("enter into the controller method");
+		if (bindingResult.hasErrors())
+		{
+			final String errorMessage = getMessageSource().getMessage(bindingResult.getAllErrors().get(0).getCode(), null,
+					getI18nService().getCurrentLocale());
+			return new ResponseEntity<String>(errorMessage, HttpStatus.BAD_REQUEST);
+		}
+		else
+		{
+			LOG.info("inside else inputstream value of uploadform image " + uploadForm.getImage().getInputStream());
+			try (final InputStream inputStream = uploadForm.getImage().getInputStream())
 			{
-				LOG.info("this is product code:" + uploadForm.getCode());
-				LOG.info("This is multifile " + uploadForm.getAnnotation());
-				LOG.info("file name" + uploadForm.getImage().getOriginalFilename());
-				//final String setProduct3DImageByCode = custome3DFacade.getProductByCode(code, image, annotation);
+				custom3DFacade.setProduct3DImageByCode(uploadForm.getCode(), uploadForm.getImage(), uploadForm.getAnnotation());
 
-
-
-				return custom3DFacade.setProduct3DImageByCode(uploadForm.getCode(), uploadForm.getImage(), uploadForm.getAnnotation());
-				//return "true";
-
-
-
+				LOG.info("inside else try going to print httpstatus ");
+				return new ResponseEntity<String>(HttpStatus.OK);
 			}
+			catch (final IOException e)
+			{
+				if (LOG.isDebugEnabled())
+				{
+					LOG.debug(e.getMessage(), e);
+				}
+
+				return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+
+		}
+	}
 }
