@@ -8,6 +8,7 @@
                 		
         
         <requires-extension name="commercefacades"/>
+         <requires-extension name="ceeafacades"/>
                 		
         
         <requires-extension name="commercewebservicescommons"/>

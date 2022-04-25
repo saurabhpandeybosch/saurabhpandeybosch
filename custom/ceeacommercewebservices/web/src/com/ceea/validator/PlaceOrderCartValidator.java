@@ -30,11 +30,9 @@ public class PlaceOrderCartValidator implements Validator
 			errors.reject("cart.notCalculated");
 		}
 
-		if (cart.getDeliveryMode() == null)
-		{
-			errors.reject("cart.deliveryModeNotSet");
-		}
-
+		/*
+		 * if (cart.getDeliveryMode() == null) { errors.reject("cart.deliveryModeNotSet"); }
+		 */
 		/*
 		 * if (cart.getPaymentInfo() == null) { errors.reject("cart.paymentInfoNotSet"); }
 		 */

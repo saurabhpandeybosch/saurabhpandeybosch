@@ -171,5 +171,15 @@
 		<property name="sorts" type="java.util.List&lt;de.hybris.platform.commerceservices.search.pagedata.SortData>"/>
 		<property name="pagination" type="de.hybris.platform.commerceservices.search.pagedata.PaginationData"/>
 	</bean>
+	
+	<bean
+		class="de.hybris.platform.commercewebservicescommons.dto.product.ProductWsDTO">
+		<property name="annotation" type="String">
+			<description>annotation </description>
+		</property>
+		 <property name="ceeaThreeDimensionalImage" type="de.hybris.platform.commercewebservicescommons.dto.product.ImageWsDTO">
+            <description>ceeaThreeDimensionalImage associated with variant option qualifier</description>
+        </property>
+	</bean>
 
 </beans>

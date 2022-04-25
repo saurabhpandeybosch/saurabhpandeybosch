@@ -185,5 +185,17 @@
 	
 	<bean id="custom3DFacade" class="de.hybris.ceea.facades.impl.Custom3DFacadeImpl">
 		<property name="upload3DImageProductService" ref="upload3DImageProductService"/>
+		<property name="productService" ref="productService"/>
 	</bean>
+	
+	 <alias name="defaultCeeaProductPopulator" alias="ceeaProductPopulator"/>
+    <bean id="defaultCeeaProductPopulator"
+          class="com.ceea.facades.populators.CeeaProductPopulator"
+          parent="defaultProductPopulator">
+    </bean>
+	<bean parent="modifyPopulatorList">
+		<property name="list" ref="productConverter"/>
+		<property name="add" ref="ceeaProductPopulator"/>
+	</bean>
+	
 </beans>
