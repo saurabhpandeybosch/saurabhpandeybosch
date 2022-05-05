@@ -143,6 +143,7 @@ public class ImportCSVPageController extends AbstractPageController
 				custom3DFacade.setProduct3DImageByCode(uploadForm.getCode(), uploadForm.getImage(), uploadForm.getAnnotation());
 
 				LOG.info("inside else try going to print httpstatus ");
+				LOG.info("inside else venky ");
 				return new ResponseEntity<String>(HttpStatus.OK);
 			}
 			catch (final IOException e)
