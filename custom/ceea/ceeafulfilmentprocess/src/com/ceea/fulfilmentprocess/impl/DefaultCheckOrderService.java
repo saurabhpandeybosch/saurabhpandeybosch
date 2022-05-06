@@ -5,6 +5,7 @@ package com.ceea.fulfilmentprocess.impl;
 
 import de.hybris.platform.core.model.order.AbstractOrderEntryModel;
 import de.hybris.platform.core.model.order.OrderModel;
+
 import com.ceea.fulfilmentprocess.CheckOrderService;
 
 
@@ -27,15 +28,15 @@ public class DefaultCheckOrderService implements CheckOrderService
 			// Order must have some lines
 			return false;
 		}
-		else if (order.getPaymentInfo() == null)
-		{
-			// Order must have some payment info to use in the process
-			return false;
-		}
+		/*
+		 * else if (order.getPaymentInfo() == null) { // Order must have some payment info to use in the process return
+		 * false; }
+		 */
 		else
 		{
 			// Order delivery options must be valid
-			return checkDeliveryOptions(order);
+			//return checkDeliveryOptions(order);
+			return true;
 		}
 	}
 
@@ -43,7 +44,7 @@ public class DefaultCheckOrderService implements CheckOrderService
 	{
 		if (order.getDeliveryMode() == null)
 		{
-			// Order must have an overall delivery mode 
+			// Order must have an overall delivery mode
 			return false;
 		}
 

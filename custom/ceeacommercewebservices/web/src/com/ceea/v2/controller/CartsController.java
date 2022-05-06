@@ -53,21 +53,6 @@ import de.hybris.platform.webservicescommons.errors.exceptions.WebserviceValidat
 import de.hybris.platform.webservicescommons.swagger.ApiBaseSiteIdAndUserIdParam;
 import de.hybris.platform.webservicescommons.swagger.ApiBaseSiteIdUserIdAndCartIdParam;
 import de.hybris.platform.webservicescommons.swagger.ApiFieldsParam;
-import com.ceea.cart.impl.CommerceWebServicesCartFacade;
-import com.ceea.exceptions.InvalidPaymentInfoException;
-import com.ceea.exceptions.NoCheckoutCartException;
-import com.ceea.exceptions.UnsupportedDeliveryModeException;
-import com.ceea.exceptions.UnsupportedRequestException;
-import com.ceea.order.data.CartDataList;
-import com.ceea.order.data.OrderEntryDataList;
-import com.ceea.product.data.PromotionResultDataList;
-import com.ceea.request.support.impl.PaymentProviderRequestSupportedStrategy;
-import com.ceea.stock.CommerceStockFacade;
-import com.ceea.validation.data.CartVoucherValidationData;
-import com.ceea.voucher.data.VoucherDataList;
-
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -76,6 +61,9 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -99,6 +87,19 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+import com.ceea.cart.impl.CommerceWebServicesCartFacade;
+import com.ceea.exceptions.InvalidPaymentInfoException;
+import com.ceea.exceptions.NoCheckoutCartException;
+import com.ceea.exceptions.UnsupportedDeliveryModeException;
+import com.ceea.exceptions.UnsupportedRequestException;
+import com.ceea.order.data.CartDataList;
+import com.ceea.order.data.OrderEntryDataList;
+import com.ceea.product.data.PromotionResultDataList;
+import com.ceea.request.support.impl.PaymentProviderRequestSupportedStrategy;
+import com.ceea.stock.CommerceStockFacade;
+import com.ceea.validation.data.CartVoucherValidationData;
+import com.ceea.voucher.data.VoucherDataList;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -200,8 +201,8 @@ public class CartsController extends BaseCommerceController
 				{
 					return oed;
 				}
-				else if (pickupStore != null && oed.getDeliveryPointOfService() != null && pickupStore
-						.equals(oed.getDeliveryPointOfService().getName()))
+				else if (pickupStore != null && oed.getDeliveryPointOfService() != null
+						&& pickupStore.equals(oed.getDeliveryPointOfService().getName()))
 				{
 					return oed;
 				}
@@ -216,22 +217,34 @@ public class CartsController extends BaseCommerceController
 		final OrderEntryData entryToBeModified = getCartEntry(currentCart, currentEntry.getProduct().getCode(), newPickupStore);
 		if (entryToBeModified != null && !entryToBeModified.getEntryNumber().equals(currentEntry.getEntryNumber()))
 		{
-			throw new CartEntryException("Ambiguous cart entries! Entry number " + currentEntry.getEntryNumber()
-					+ " after change would be the same as entry " + entryToBeModified.getEntryNumber(),
+			throw new CartEntryException(
+					"Ambiguous cart entries! Entry number " + currentEntry.getEntryNumber()
+							+ " after change would be the same as entry " + entryToBeModified.getEntryNumber(),
 					CartEntryException.AMBIGIOUS_ENTRY, entryToBeModified.getEntryNumber().toString());
 		}
 	}
 
+	//occ webservices
+	@Secured(
+	{ "ROLE_CUSTOMERGROUP", "ROLE_CLIENT", "ROLE_CUSTOEMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
 	@ApiOperation(nickname = "getCarts", value = "Get all customer carts.", notes = "Lists all customer carts.")
 	@ApiBaseSiteIdAndUserIdParam
-	public CartListWsDTO getCarts(
-			@ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields,
-			@ApiParam(value = "Optional parameter. If the parameter is provided and its value is true, only saved carts are returned.") @RequestParam(defaultValue = "false") final boolean savedCartsOnly,
-			@ApiParam(value = "Optional pagination parameter in case of savedCartsOnly == true. Default value 0.") @RequestParam(defaultValue = DEFAULT_CURRENT_PAGE) final int currentPage,
-			@ApiParam(value = "Optional {@link PaginationData} parameter in case of savedCartsOnly == true. Default value 20.") @RequestParam(defaultValue = DEFAULT_PAGE_SIZE) final int pageSize,
-			@ApiParam(value = "Optional sort criterion in case of savedCartsOnly == true. No default value.") @RequestParam(required = false) final String sort)
+	public CartListWsDTO getCarts(@ApiFieldsParam
+	@RequestParam(defaultValue = DEFAULT_FIELD_SET)
+	final String fields,
+			@ApiParam(value = "Optional parameter. If the parameter is provided and its value is true, only saved carts are returned.")
+			@RequestParam(defaultValue = "false")
+			final boolean savedCartsOnly,
+			@ApiParam(value = "Optional pagination parameter in case of savedCartsOnly == true. Default value 0.")
+			@RequestParam(defaultValue = DEFAULT_CURRENT_PAGE)
+			final int currentPage,
+			@ApiParam(value = "Optional {@link PaginationData} parameter in case of savedCartsOnly == true. Default value 20.")
+			@RequestParam(defaultValue = DEFAULT_PAGE_SIZE)
+			final int pageSize, @ApiParam(value = "Optional sort criterion in case of savedCartsOnly == true. No default value.")
+			@RequestParam(required = false)
+			final String sort)
 	{
 		if (getUserFacade().isAnonymousUser())
 		{
@@ -255,25 +268,36 @@ public class CartsController extends BaseCommerceController
 		return getDataMapper().map(cartDataList, CartListWsDTO.class, fields);
 	}
 
+	//occ webservices
+	@Secured(
+	{ "ROLE_CUSTOMERGROUP", "ROLE_CLIENT", "ROLE_CUSTOEMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
 	@RequestMapping(value = "/{cartId}", method = RequestMethod.GET)
 	@ResponseBody
 	@ApiOperation(nickname = "getCart", value = "Get a cart with a given identifier.", notes = "Returns the cart with a given identifier.")
 	@ApiBaseSiteIdUserIdAndCartIdParam
-	public CartWsDTO getCart(
-			@ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields)
+	public CartWsDTO getCart(@ApiFieldsParam
+	@RequestParam(defaultValue = DEFAULT_FIELD_SET)
+	final String fields)
 	{
 		// CartMatchingFilter sets current cart based on cartId, so we can return cart from the session
 		return getDataMapper().map(getSessionCart(), CartWsDTO.class, fields);
 	}
 
+	//occ webservices
+	@Secured(
+	{ "ROLE_CUSTOMERGROUP", "ROLE_CLIENT", "ROLE_CUSTOEMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
 	@RequestMapping(method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	@ResponseBody
 	@ApiOperation(nickname = "createCart", value = "Creates or restore a cart for a user.", notes = "Creates a new cart or restores an anonymous cart as a user's cart (if an old Cart Id is given in the request).")
 	@ApiBaseSiteIdAndUserIdParam
-	public CartWsDTO createCart(@ApiParam(value = "Anonymous cart GUID.") @RequestParam(required = false) final String oldCartId,
-			@ApiParam(value = "The GUID of the user's cart that will be merged with the anonymous cart.") @RequestParam(required = false) final String toMergeCartGuid,
-			@ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields)
+	public CartWsDTO createCart(@ApiParam(value = "Anonymous cart GUID.")
+	@RequestParam(required = false)
+	final String oldCartId, @ApiParam(value = "The GUID of the user's cart that will be merged with the anonymous cart.")
+	@RequestParam(required = false)
+	final String toMergeCartGuid, @ApiFieldsParam
+	@RequestParam(defaultValue = DEFAULT_FIELD_SET)
+	final String fields)
 	{
 		LOG.debug("createCart");
 		String evaluatedToMergeCartGuid = toMergeCartGuid;
@@ -359,6 +383,9 @@ public class CartsController extends BaseCommerceController
 		return true;
 	}
 
+	//occ webservices
+	@Secured(
+	{ "ROLE_CUSTOMERGROUP", "ROLE_CLIENT", "ROLE_CUSTOEMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
 	@RequestMapping(value = "/{cartId}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
 	@ApiOperation(nickname = "removeCart", value = "Deletes a cart with a given cart id.", notes = "Deletes a cart with a given cart id.")
@@ -368,14 +395,17 @@ public class CartsController extends BaseCommerceController
 		getCartFacade().removeSessionCart();
 	}
 
-	@Secured({ "ROLE_CLIENT", "ROLE_TRUSTED_CLIENT" })
+	//occ webservices
+	@Secured(
+	{ "ROLE_CUSTOMERGROUP", "ROLE_CLIENT", "ROLE_CUSTOEMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
 	@RequestMapping(value = "/{cartId}/email", method = RequestMethod.PUT)
 	@ResponseStatus(HttpStatus.OK)
 	@ApiOperation(nickname = "replaceCartGuestUser", value = "Assigns an email to the cart.", notes = "Assigns an email to the cart. This step is required to make a guest checkout.")
 	@ApiBaseSiteIdUserIdAndCartIdParam
 	public void replaceCartGuestUser(
-			@ApiParam(value = "Email of the guest user. It will be used during the checkout process.", required = true) @RequestParam final String email)
-			throws DuplicateUidException
+			@ApiParam(value = "Email of the guest user. It will be used during the checkout process.", required = true)
+			@RequestParam
+			final String email) throws DuplicateUidException
 	{
 		LOG.debug("replaceCartGuestUser: email={}", sanitize(email));
 		if (!EmailValidator.getInstance().isValid(email))
@@ -387,12 +417,16 @@ public class CartsController extends BaseCommerceController
 		customerFacade.createGuestUserForAnonymousCheckout(email, "guest");
 	}
 
+	//occ webservices
+	@Secured(
+	{ "ROLE_CUSTOMERGROUP", "ROLE_CLIENT", "ROLE_CUSTOEMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
 	@RequestMapping(value = "/{cartId}/entries", method = RequestMethod.GET)
 	@ResponseBody
 	@ApiOperation(nickname = "getCartEntries", value = "Get cart entries.", notes = "Returns cart entries.")
 	@ApiBaseSiteIdUserIdAndCartIdParam
-	public OrderEntryListWsDTO getCartEntries(
-			@ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields)
+	public OrderEntryListWsDTO getCartEntries(@ApiFieldsParam
+	@RequestParam(defaultValue = DEFAULT_FIELD_SET)
+	final String fields)
 	{
 		LOG.debug("getCartEntries");
 		final OrderEntryDataList dataList = new OrderEntryDataList();
@@ -401,21 +435,30 @@ public class CartsController extends BaseCommerceController
 	}
 
 	/**
-	 * @deprecated since 2005. Please use {@link CartsController#createCartEntry(String, OrderEntryWsDTO, String)} instead.
+	 * @deprecated since 2005. Please use {@link CartsController#createCartEntry(String, OrderEntryWsDTO, String)}
+	 *             instead.
 	 */
 	@Deprecated(since = "2005", forRemoval = true)
+	//occ webservices
+	@Secured(
+	{ "ROLE_CUSTOMERGROUP", "ROLE_CLIENT", "ROLE_CUSTOEMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
 	@RequestMapping(value = "/{cartId}/entries", method = RequestMethod.POST)
 	@ResponseBody
 	@SiteChannelRestriction(allowedSiteChannelsProperty = API_COMPATIBILITY_B2C_CHANNELS)
 	@ApiOperation(hidden = true, value = "Adds a product to the cart.", notes = "Adds a product to the cart.")
 	@ApiBaseSiteIdUserIdAndCartIdParam
-	public CartModificationWsDTO createCartEntry(
-			@PathVariable final String baseSiteId,
-			@ApiParam(value = "Code of the product to be added to cart. Product look-up is performed for the current product catalog version.", required = true) @RequestParam final String code,
-			@ApiParam(value = "Quantity of product.") @RequestParam(defaultValue = "1") final long qty,
-			@ApiParam(value = "Name of the store where product will be picked. Set only if want to pick up from a store.") @RequestParam(required = false) final String pickupStore,
-			@ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields)
-			throws CommerceCartModificationException
+	public CartModificationWsDTO createCartEntry(@PathVariable
+	final String baseSiteId,
+			@ApiParam(value = "Code of the product to be added to cart. Product look-up is performed for the current product catalog version.", required = true)
+			@RequestParam
+			final String code, @ApiParam(value = "Quantity of product.")
+			@RequestParam(defaultValue = "1")
+			final long qty,
+			@ApiParam(value = "Name of the store where product will be picked. Set only if want to pick up from a store.")
+			@RequestParam(required = false)
+			final String pickupStore, @ApiFieldsParam
+			@RequestParam(defaultValue = DEFAULT_FIELD_SET)
+			final String fields) throws CommerceCartModificationException
 	{
 		LOG.debug("createCartEntry: {}, {}, {}", logParam("code", code), logParam("qty", qty), logParam(PICKUP_STORE, pickupStore));
 
@@ -444,17 +487,24 @@ public class CartsController extends BaseCommerceController
 		return getDataMapper().map(cartModificationData, CartModificationWsDTO.class, fields);
 	}
 
+	//occ webservices
+	@Secured(
+	{ "ROLE_CUSTOMERGROUP", "ROLE_CLIENT", "ROLE_CUSTOEMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
 	@PostMapping(value = "/{cartId}/entrygroups/{entryGroupNumber}", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	@ApiOperation(nickname = "addToCartEntryGroup", value = "Add a product to a cart entry group.", notes = "Adds a product to a cart entry group.")
 	@ApiBaseSiteIdUserIdAndCartIdParam
-	public CartModificationWsDTO addToCartEntryGroup(
-			@PathVariable final String baseSiteId,
-			@ApiParam(value = "Each entry group in a cart has a specific entry group number. Entry group numbers are integers starting at one. They are defined in ascending order.", required = true) @PathVariable final Integer entryGroupNumber,
-			@ApiParam(value = "Request body parameter that contains details such as the product code (product.code) and the quantity of product (quantity).", required = true) @RequestBody final OrderEntryWsDTO entry,
-			@ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields)
-			throws CommerceCartModificationException
+	public CartModificationWsDTO addToCartEntryGroup(@PathVariable
+	final String baseSiteId,
+			@ApiParam(value = "Each entry group in a cart has a specific entry group number. Entry group numbers are integers starting at one. They are defined in ascending order.", required = true)
+			@PathVariable
+			final Integer entryGroupNumber,
+			@ApiParam(value = "Request body parameter that contains details such as the product code (product.code) and the quantity of product (quantity).", required = true)
+			@RequestBody
+			final OrderEntryWsDTO entry, @ApiFieldsParam
+			@RequestParam(defaultValue = DEFAULT_FIELD_SET)
+			final String fields) throws CommerceCartModificationException
 	{
 		if (entry.getQuantity() == null)
 		{
@@ -476,17 +526,22 @@ public class CartsController extends BaseCommerceController
 		return getDataMapper().map(cartModificationData, CartModificationWsDTO.class, fields);
 	}
 
-	@RequestMapping(value = "/{cartId}/entries", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
-			MediaType.APPLICATION_XML_VALUE })
+	//occ webservices
+	@Secured(
+	{ "ROLE_CUSTOMERGROUP", "ROLE_CLIENT", "ROLE_CUSTOEMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
+	@RequestMapping(value = "/{cartId}/entries", method = RequestMethod.POST, consumes =
+	{ MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
 	@ResponseBody
 	@SiteChannelRestriction(allowedSiteChannelsProperty = API_COMPATIBILITY_B2C_CHANNELS)
 	@ApiOperation(nickname = "createCartEntry", value = "Adds a product to the cart.", notes = "Adds a product to the cart.")
 	@ApiBaseSiteIdUserIdAndCartIdParam
-	public CartModificationWsDTO createCartEntry(
-			@PathVariable final String baseSiteId,
-			@ApiParam(value = "Request body parameter that contains details such as the product code (product.code), the quantity of product (quantity), and the pickup store name (deliveryPointOfService.name).\n\nThe DTO is in XML or .json format.", required = true) @RequestBody final OrderEntryWsDTO entry,
-			@ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields)
-			throws CommerceCartModificationException
+	public CartModificationWsDTO createCartEntry(@PathVariable
+	final String baseSiteId,
+			@ApiParam(value = "Request body parameter that contains details such as the product code (product.code), the quantity of product (quantity), and the pickup store name (deliveryPointOfService.name).\n\nThe DTO is in XML or .json format.", required = true)
+			@RequestBody
+			final OrderEntryWsDTO entry, @ApiFieldsParam
+			@RequestParam(defaultValue = DEFAULT_FIELD_SET)
+			final String fields) throws CommerceCartModificationException
 	{
 		if (entry.getQuantity() == null)
 		{
@@ -499,13 +554,19 @@ public class CartsController extends BaseCommerceController
 		return addCartEntryInternal(baseSiteId, entry.getProduct().getCode(), entry.getQuantity().longValue(), pickupStore, fields);
 	}
 
+	//occ webservices
+	@Secured(
+	{ "ROLE_CUSTOMERGROUP", "ROLE_CLIENT", "ROLE_CUSTOEMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
 	@RequestMapping(value = "/{cartId}/entries/{entryNumber}", method = RequestMethod.GET)
 	@ResponseBody
 	@ApiOperation(nickname = "getCartEntry", value = "Get the details of the cart entries.", notes = "Returns the details of the cart entries.")
 	@ApiBaseSiteIdUserIdAndCartIdParam
 	public OrderEntryWsDTO getCartEntry(
-			@ApiParam(value = "The entry number. Each entry in a cart has an entry number. Cart entries are numbered in ascending order, starting with zero (0).", required = true) @PathVariable final long entryNumber,
-			@ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields)
+			@ApiParam(value = "The entry number. Each entry in a cart has an entry number. Cart entries are numbered in ascending order, starting with zero (0).", required = true)
+			@PathVariable
+			final long entryNumber, @ApiFieldsParam
+			@RequestParam(defaultValue = DEFAULT_FIELD_SET)
+			final String fields)
 	{
 		LOG.debug("getCartEntry: {}", logParam(ENTRY_NUMBER, entryNumber));
 		final OrderEntryData orderEntry = getCartEntryForNumber(getSessionCart(), entryNumber);
@@ -513,21 +574,30 @@ public class CartsController extends BaseCommerceController
 	}
 
 	/**
-	 * @deprecated since 2005. Please use {@link CartsController#replaceCartEntry(String, long, OrderEntryWsDTO, String)} instead.
+	 * @deprecated since 2005. Please use {@link CartsController#replaceCartEntry(String, long, OrderEntryWsDTO, String)}
+	 *             instead.
 	 */
 	@Deprecated(since = "2005", forRemoval = true)
+	//occ webservices
+	@Secured(
+	{ "ROLE_CUSTOMERGROUP", "ROLE_CLIENT", "ROLE_CUSTOEMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
 	@RequestMapping(value = "/{cartId}/entries/{entryNumber}", method = RequestMethod.PUT)
 	@ResponseBody
 	@SiteChannelRestriction(allowedSiteChannelsProperty = API_COMPATIBILITY_B2C_CHANNELS)
 	@ApiOperation(hidden = true, value = "Set quantity and store details of a cart entry.", notes = "Updates the quantity of a single cart entry and the details of the store where the cart entry will be picked up. Attributes not provided in request will be defined again (set to null or default)")
 	@ApiBaseSiteIdUserIdAndCartIdParam
-	public CartModificationWsDTO replaceCartEntry(
-			@PathVariable final String baseSiteId,
-			@ApiParam(value = "The entry number. Each entry in a cart has an entry number. Cart entries are numbered in ascending order, starting with zero (0).", required = true) @PathVariable final long entryNumber,
-			@ApiParam(value = "Quantity of product.", required = true) @RequestParam final Long qty,
-			@ApiParam(value = "Name of the store where product will be picked. Set only if want to pick up from a store.") @RequestParam(required = false) final String pickupStore,
-			@ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields)
-			throws CommerceCartModificationException
+	public CartModificationWsDTO replaceCartEntry(@PathVariable
+	final String baseSiteId,
+			@ApiParam(value = "The entry number. Each entry in a cart has an entry number. Cart entries are numbered in ascending order, starting with zero (0).", required = true)
+			@PathVariable
+			final long entryNumber, @ApiParam(value = "Quantity of product.", required = true)
+			@RequestParam
+			final Long qty,
+			@ApiParam(value = "Name of the store where product will be picked. Set only if want to pick up from a store.")
+			@RequestParam(required = false)
+			final String pickupStore, @ApiFieldsParam
+			@RequestParam(defaultValue = DEFAULT_FIELD_SET)
+			final String fields) throws CommerceCartModificationException
 	{
 		LOG.debug("replaceCartEntry: {}, {}, {}", logParam(ENTRY_NUMBER, entryNumber), logParam("qty", qty),
 				logParam(PICKUP_STORE, pickupStore));
@@ -575,23 +645,29 @@ public class CartsController extends BaseCommerceController
 			cartModificationData2 = getCartFacade().updateCartEntry(entryNumber, qty.longValue());
 		}
 
-		return getDataMapper()
-				.map(mergeCartModificationData(cartModificationData1, cartModificationData2), CartModificationWsDTO.class, fields);
+		return getDataMapper().map(mergeCartModificationData(cartModificationData1, cartModificationData2),
+				CartModificationWsDTO.class, fields);
 	}
 
-	@RequestMapping(value = "/{cartId}/entries/{entryNumber}", method = RequestMethod.PUT, consumes = {
-			MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
+	//occ webservices
+	@Secured(
+	{ "ROLE_CUSTOMERGROUP", "ROLE_CLIENT", "ROLE_CUSTOEMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
+	@RequestMapping(value = "/{cartId}/entries/{entryNumber}", method = RequestMethod.PUT, consumes =
+	{ MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
 	@ResponseBody
-	@ApiOperation(nickname = "replaceCartEntry", value = "Set quantity and store details of a cart entry.", notes =
-			"Updates the quantity of a single cart entry and the details of the store where the cart entry will be picked up. "
-					+ "Attributes not provided in request will be defined again (set to null or default)")
+	@ApiOperation(nickname = "replaceCartEntry", value = "Set quantity and store details of a cart entry.", notes = "Updates the quantity of a single cart entry and the details of the store where the cart entry will be picked up. "
+			+ "Attributes not provided in request will be defined again (set to null or default)")
 	@ApiBaseSiteIdUserIdAndCartIdParam
-	public CartModificationWsDTO replaceCartEntry(
-			@PathVariable final String baseSiteId,
-			@ApiParam(value = "The entry number. Each entry in a cart has an entry number. Cart entries are numbered in ascending order, starting with zero (0).", required = true) @PathVariable final long entryNumber,
-			@ApiParam(value = "Request body parameter that contains details such as the quantity of product (quantity), and the pickup store name (deliveryPointOfService.name)\n\nThe DTO is in XML or .json format.", required = true) @RequestBody final OrderEntryWsDTO entry,
-			@ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields)
-			throws CommerceCartModificationException
+	public CartModificationWsDTO replaceCartEntry(@PathVariable
+	final String baseSiteId,
+			@ApiParam(value = "The entry number. Each entry in a cart has an entry number. Cart entries are numbered in ascending order, starting with zero (0).", required = true)
+			@PathVariable
+			final long entryNumber,
+			@ApiParam(value = "Request body parameter that contains details such as the quantity of product (quantity), and the pickup store name (deliveryPointOfService.name)\n\nThe DTO is in XML or .json format.", required = true)
+			@RequestBody
+			final OrderEntryWsDTO entry, @ApiFieldsParam
+			@RequestParam(defaultValue = DEFAULT_FIELD_SET)
+			final String fields) throws CommerceCartModificationException
 	{
 		final CartData cart = getSessionCart();
 		final OrderEntryData orderEntry = getCartEntryForNumber(cart, entryNumber);
@@ -616,20 +692,29 @@ public class CartsController extends BaseCommerceController
 	}
 
 	/**
-	 * @deprecated since 2005. Please use {@link CartsController#updateCartEntry(String, long, OrderEntryWsDTO, String)} instead.
+	 * @deprecated since 2005. Please use {@link CartsController#updateCartEntry(String, long, OrderEntryWsDTO, String)}
+	 *             instead.
 	 */
 	@Deprecated(since = "2005", forRemoval = true)
+	//occ webservices
+	@Secured(
+	{ "ROLE_CUSTOMERGROUP", "ROLE_CLIENT", "ROLE_CUSTOEMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
 	@RequestMapping(value = "/{cartId}/entries/{entryNumber}", method = RequestMethod.PATCH)
 	@ResponseBody
 	@ApiOperation(hidden = true, value = "Update quantity and store details of a cart entry.", notes = "Updates the quantity of a single cart entry and the details of the store where the cart entry will be picked up.")
 	@ApiBaseSiteIdUserIdAndCartIdParam
-	public CartModificationWsDTO updateCartEntry(
-			@PathVariable final String baseSiteId,
-			@ApiParam(value = "The entry number. Each entry in a cart has an entry number. Cart entries are numbered in ascending order, starting with zero (0).", required = true) @PathVariable final long entryNumber,
-			@ApiParam(value = "Quantity of product.") @RequestParam(required = false) final Long qty,
-			@ApiParam(value = "Name of the store where product will be picked. Set only if want to pick up from a store.") @RequestParam(required = false) final String pickupStore,
-			@ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields)
-			throws CommerceCartModificationException
+	public CartModificationWsDTO updateCartEntry(@PathVariable
+	final String baseSiteId,
+			@ApiParam(value = "The entry number. Each entry in a cart has an entry number. Cart entries are numbered in ascending order, starting with zero (0).", required = true)
+			@PathVariable
+			final long entryNumber, @ApiParam(value = "Quantity of product.")
+			@RequestParam(required = false)
+			final Long qty,
+			@ApiParam(value = "Name of the store where product will be picked. Set only if want to pick up from a store.")
+			@RequestParam(required = false)
+			final String pickupStore, @ApiFieldsParam
+			@RequestParam(defaultValue = DEFAULT_FIELD_SET)
+			final String fields) throws CommerceCartModificationException
 	{
 		LOG.debug("updateCartEntry: {}, {}, {}", logParam(ENTRY_NUMBER, entryNumber), logParam("qty", qty),
 				logParam(PICKUP_STORE, pickupStore));
@@ -655,17 +740,24 @@ public class CartsController extends BaseCommerceController
 		return updateCartEntryInternal(baseSiteId, cart, orderEntry, qty, pickupStore, fields, false);
 	}
 
-	@RequestMapping(value = "/{cartId}/entries/{entryNumber}", method = RequestMethod.PATCH, consumes = {
-			MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
+	//occ webservices
+	@Secured(
+	{ "ROLE_CUSTOMERGROUP", "ROLE_CLIENT", "ROLE_CUSTOEMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
+	@RequestMapping(value = "/{cartId}/entries/{entryNumber}", method = RequestMethod.PATCH, consumes =
+	{ MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
 	@ResponseBody
 	@ApiOperation(nickname = "updateCartEntry", value = "Update quantity and store details of a cart entry.", notes = "Updates the quantity of a single cart entry and the details of the store where the cart entry will be picked up.")
 	@ApiBaseSiteIdUserIdAndCartIdParam
-	public CartModificationWsDTO updateCartEntry(
-			@PathVariable final String baseSiteId,
-			@ApiParam(value = "The entry number. Each entry in a cart has an entry number. Cart entries are numbered in ascending order, starting with zero (0).", required = true) @PathVariable final long entryNumber,
-			@ApiParam(value = "Request body parameter that contains details such as the quantity of product (quantity), and the pickup store name (deliveryPointOfService.name)\n\nThe DTO is in XML or .json format.", required = true) @RequestBody final OrderEntryWsDTO entry,
-			@ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields)
-			throws CommerceCartModificationException
+	public CartModificationWsDTO updateCartEntry(@PathVariable
+	final String baseSiteId,
+			@ApiParam(value = "The entry number. Each entry in a cart has an entry number. Cart entries are numbered in ascending order, starting with zero (0).", required = true)
+			@PathVariable
+			final long entryNumber,
+			@ApiParam(value = "Request body parameter that contains details such as the quantity of product (quantity), and the pickup store name (deliveryPointOfService.name)\n\nThe DTO is in XML or .json format.", required = true)
+			@RequestBody
+			final OrderEntryWsDTO entry, @ApiFieldsParam
+			@RequestParam(defaultValue = DEFAULT_FIELD_SET)
+			final String fields) throws CommerceCartModificationException
 	{
 		final CartData cart = getSessionCart();
 		final OrderEntryData orderEntry = getCartEntryForNumber(cart, entryNumber);
@@ -689,13 +781,17 @@ public class CartsController extends BaseCommerceController
 		return updateCartEntryInternal(baseSiteId, cart, orderEntry, entry.getQuantity(), pickupStore, fields, false);
 	}
 
+	//occ webservices
+	@Secured(
+	{ "ROLE_CUSTOMERGROUP", "ROLE_CLIENT", "ROLE_CUSTOEMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
 	@RequestMapping(value = "/{cartId}/entries/{entryNumber}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
 	@ApiOperation(nickname = "removeCartEntry", value = "Deletes cart entry.", notes = "Deletes cart entry.")
 	@ApiBaseSiteIdUserIdAndCartIdParam
 	public void removeCartEntry(
-			@ApiParam(value = "The entry number. Each entry in a cart has an entry number. Cart entries are numbered in ascending order, starting with zero (0).", required = true) @PathVariable final long entryNumber)
-			throws CommerceCartModificationException
+			@ApiParam(value = "The entry number. Each entry in a cart has an entry number. Cart entries are numbered in ascending order, starting with zero (0).", required = true)
+			@PathVariable
+			final long entryNumber) throws CommerceCartModificationException
 	{
 		LOG.debug("removeCartEntry: {}", logParam(ENTRY_NUMBER, entryNumber));
 		final CartData cart = getSessionCart();
@@ -703,13 +799,17 @@ public class CartsController extends BaseCommerceController
 		getCartFacade().updateCartEntry(entryNumber, 0);
 	}
 
+	//occ webservices
+	@Secured(
+	{ "ROLE_CUSTOMERGROUP", "ROLE_CLIENT", "ROLE_CUSTOEMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
 	@DeleteMapping(value = "/{cartId}/entrygroups/{entryGroupNumber}")
 	@ResponseStatus(HttpStatus.OK)
 	@ApiOperation(nickname = "removeCartEntryGroup", value = "Delete an entry group.", notes = "Removes an entry group from an associated cart. The entry group is identified by an entryGroupNumber. The cart is identified by the cartId.")
 	@ApiBaseSiteIdUserIdAndCartIdParam
 	public void removeEntryGroup(
-			@ApiParam(value = "Each entry group in a cart has a specific entry group number. Entry group numbers are integers starting at one. They are defined in ascending order.", required = true) @PathVariable final int entryGroupNumber)
-			throws CommerceCartModificationException
+			@ApiParam(value = "Each entry group in a cart has a specific entry group number. Entry group numbers are integers starting at one. They are defined in ascending order.", required = true)
+			@PathVariable
+			final int entryGroupNumber) throws CommerceCartModificationException
 	{
 		validate(entryGroupNumber, "entryGroupNumber", greaterThanZeroValidator);
 
@@ -723,17 +823,20 @@ public class CartsController extends BaseCommerceController
 	}
 
 	/**
-	 * @deprecated since 2005. Please use {@link CartsController#createCartDeliveryAddress(AddressWsDTO, String)} instead.
+	 * @deprecated since 2005. Please use {@link CartsController#createCartDeliveryAddress(AddressWsDTO, String)}
+	 *             instead.
 	 */
 	@Deprecated(since = "1905", forRemoval = true)
-	@Secured({ "ROLE_CUSTOMERGROUP", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_GUEST", "ROLE_TRUSTED_CLIENT" })
+	@Secured(
+	{ "ROLE_CUSTOMERGROUP", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_GUEST", "ROLE_TRUSTED_CLIENT" })
 	@RequestMapping(value = "/{cartId}/addresses/delivery", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	@ResponseBody
 	@ApiOperation(hidden = true, value = "Creates a delivery address for the cart.", notes = "Creates an address and assigns it to the cart as the delivery address.")
 	@ApiBaseSiteIdUserIdAndCartIdParam
-	public AddressWsDTO createCartDeliveryAddress(final HttpServletRequest request,
-			@ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields)
+	public AddressWsDTO createCartDeliveryAddress(final HttpServletRequest request, @ApiFieldsParam
+	@RequestParam(defaultValue = DEFAULT_FIELD_SET)
+	final String fields)
 	{
 		LOG.debug("createCartDeliveryAddress");
 		final AddressData addressData = super.createAddressInternal(request);
@@ -742,17 +845,21 @@ public class CartsController extends BaseCommerceController
 		return getDataMapper().map(addressData, AddressWsDTO.class, fields);
 	}
 
-	@Secured({ "ROLE_CUSTOMERGROUP", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_GUEST", "ROLE_TRUSTED_CLIENT" })
-	@RequestMapping(value = "/{cartId}/addresses/delivery", method = RequestMethod.POST, consumes = {
-			MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
+	@Secured(
+	{ "ROLE_CUSTOMERGROUP", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_GUEST", "ROLE_TRUSTED_CLIENT" })
+	@RequestMapping(value = "/{cartId}/addresses/delivery", method = RequestMethod.POST, consumes =
+	{ MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
 	@ResponseStatus(HttpStatus.CREATED)
 	@ResponseBody
 	@ApiOperation(nickname = "createCartDeliveryAddress", value = "Creates a delivery address for the cart.", notes = "Creates an address and assigns it to the cart as the delivery address.")
 	@ApiBaseSiteIdUserIdAndCartIdParam
-	public AddressWsDTO createCartDeliveryAddress(@ApiParam(value =
-			"Request body parameter that contains details such as the customer's first name (firstName), the customer's last name (lastName), the customer's title (titleCode), the customer's phone (phone), "
-					+ "the country (country.isocode), the first part of the address (line1), the second part of the address (line2), the town (town), the postal code (postalCode), and the region (region.isocode).\n\nThe DTO is in XML or .json format.", required = true) @RequestBody final AddressWsDTO address,
-			@ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields)
+	public AddressWsDTO createCartDeliveryAddress(
+			@ApiParam(value = "Request body parameter that contains details such as the customer's first name (firstName), the customer's last name (lastName), the customer's title (titleCode), the customer's phone (phone), "
+					+ "the country (country.isocode), the first part of the address (line1), the second part of the address (line2), the town (town), the postal code (postalCode), and the region (region.isocode).\n\nThe DTO is in XML or .json format.", required = true)
+			@RequestBody
+			final AddressWsDTO address, @ApiFieldsParam
+			@RequestParam(defaultValue = DEFAULT_FIELD_SET)
+			final String fields)
 	{
 		LOG.debug("createCartDeliveryAddress");
 		validate(address, OBJECT_NAME_ADDRESS, getAddressDTOValidator());
@@ -762,19 +869,22 @@ public class CartsController extends BaseCommerceController
 		return getDataMapper().map(addressData, AddressWsDTO.class, fields);
 	}
 
-	@Secured({ "ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
+	@Secured(
+	{ "ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
 	@RequestMapping(value = "/{cartId}/addresses/delivery", method = RequestMethod.PUT)
 	@ResponseStatus(HttpStatus.OK)
 	@SiteChannelRestriction(allowedSiteChannelsProperty = API_COMPATIBILITY_B2C_CHANNELS)
 	@ApiOperation(nickname = "replaceCartDeliveryAddress", value = "Sets a delivery address for the cart.", notes = "Sets a delivery address for the cart. The address country must be placed among the delivery countries of the current base store.")
 	@ApiBaseSiteIdUserIdAndCartIdParam
-	public void replaceCartDeliveryAddress(
-			@ApiParam(value = "Address identifier", required = true) @RequestParam final String addressId)
+	public void replaceCartDeliveryAddress(@ApiParam(value = "Address identifier", required = true)
+	@RequestParam
+	final String addressId)
 	{
 		super.setCartDeliveryAddressInternal(addressId);
 	}
 
-	@Secured({ "ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
+	@Secured(
+	{ "ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
 	@RequestMapping(value = "/{cartId}/addresses/delivery", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
 	@ApiOperation(nickname = "removeCartDeliveryAddress", value = "Deletes the delivery address from the cart.", notes = "Deletes the delivery address from the cart.")
@@ -788,31 +898,35 @@ public class CartsController extends BaseCommerceController
 		}
 	}
 
-	@Secured({ "ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
+	@Secured(
+	{ "ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
 	@RequestMapping(value = "/{cartId}/deliverymode", method = RequestMethod.GET)
 	@ResponseBody
 	@ApiOperation(nickname = "getCartDeliveryMode", value = "Get the delivery mode selected for the cart.", notes = "Returns the delivery mode selected for the cart.")
 	@ApiBaseSiteIdUserIdAndCartIdParam
-	public DeliveryModeWsDTO getCartDeliveryMode(
-			@ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields)
+	public DeliveryModeWsDTO getCartDeliveryMode(@ApiFieldsParam
+	@RequestParam(defaultValue = DEFAULT_FIELD_SET)
+	final String fields)
 	{
 		LOG.debug("getCartDeliveryMode");
 		return getDataMapper().map(getSessionCart().getDeliveryMode(), DeliveryModeWsDTO.class, fields);
 	}
 
-	@Secured({ "ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
+	@Secured(
+	{ "ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
 	@RequestMapping(value = "/{cartId}/deliverymode", method = RequestMethod.PUT)
 	@ResponseStatus(HttpStatus.OK)
 	@ApiOperation(nickname = "replaceCartDeliveryMode", value = "Sets the delivery mode for a cart.", notes = "Sets the delivery mode with a given identifier for the cart.")
 	@ApiBaseSiteIdUserIdAndCartIdParam
-	public void replaceCartDeliveryMode(
-			@ApiParam(value = "Delivery mode identifier (code)", required = true) @RequestParam(required = true) final String deliveryModeId)
-			throws UnsupportedDeliveryModeException
+	public void replaceCartDeliveryMode(@ApiParam(value = "Delivery mode identifier (code)", required = true)
+	@RequestParam(required = true)
+	final String deliveryModeId) throws UnsupportedDeliveryModeException
 	{
 		super.setCartDeliveryModeInternal(deliveryModeId);
 	}
 
-	@Secured({ "ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
+	@Secured(
+	{ "ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
 	@RequestMapping(value = "/{cartId}/deliverymode", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
 	@ApiOperation(nickname = "removeCartDeliveryMode", value = "Deletes the delivery mode from the cart.", notes = "Deletes the delivery mode from the cart.")
@@ -826,15 +940,16 @@ public class CartsController extends BaseCommerceController
 		}
 	}
 
-	@Secured({ "ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
+	@Secured(
+	{ "ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
 	@RequestMapping(value = "/{cartId}/deliverymodes", method = RequestMethod.GET)
 	@ResponseBody
-	@ApiOperation(nickname = "getCartDeliveryModes", value = "Get all delivery modes for the current store and delivery address.", notes =
-			"Returns all delivery modes supported for the "
-					+ "current base store and cart delivery address. A delivery address must be set for the cart, otherwise an empty list will be returned.")
+	@ApiOperation(nickname = "getCartDeliveryModes", value = "Get all delivery modes for the current store and delivery address.", notes = "Returns all delivery modes supported for the "
+			+ "current base store and cart delivery address. A delivery address must be set for the cart, otherwise an empty list will be returned.")
 	@ApiBaseSiteIdUserIdAndCartIdParam
-	public DeliveryModeListWsDTO getCartDeliveryModes(
-			@ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields)
+	public DeliveryModeListWsDTO getCartDeliveryModes(@ApiFieldsParam
+	@RequestParam(defaultValue = DEFAULT_FIELD_SET)
+	final String fields)
 	{
 		LOG.debug("getCartDeliveryModes");
 		final DeliveryModesData deliveryModesData = new DeliveryModesData();
@@ -844,38 +959,43 @@ public class CartsController extends BaseCommerceController
 	}
 
 	/**
-	 * @deprecated since 2005. Please use {@link CartsController#createCartPaymentDetails(PaymentDetailsWsDTO, String)} instead.
+	 * @deprecated since 2005. Please use {@link CartsController#createCartPaymentDetails(PaymentDetailsWsDTO, String)}
+	 *             instead.
 	 */
 	@Deprecated(since = "2005", forRemoval = true)
-	@Secured({ "ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
+	@Secured(
+	{ "ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
 	@RequestMapping(value = "/{cartId}/paymentdetails", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	@ResponseBody
 	@ApiOperation(hidden = true, value = "Defines and assigns details of a new credit card payment to the cart.", notes = "Defines the details of a new credit card, and assigns this payment option to the cart.")
 	@ApiBaseSiteIdUserIdAndCartIdParam
-	public PaymentDetailsWsDTO createCartPaymentDetails(final HttpServletRequest request,
-			@ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields)
-			throws InvalidPaymentInfoException, NoCheckoutCartException, UnsupportedRequestException
+	public PaymentDetailsWsDTO createCartPaymentDetails(final HttpServletRequest request, @ApiFieldsParam
+	@RequestParam(defaultValue = DEFAULT_FIELD_SET)
+	final String fields) throws InvalidPaymentInfoException, NoCheckoutCartException, UnsupportedRequestException
 	{
 		paymentProviderRequestSupportedStrategy.checkIfRequestSupported("addPaymentDetails");
 		final CCPaymentInfoData paymentInfoData = super.addPaymentDetailsInternal(request).getPaymentInfo();
 		return getDataMapper().map(paymentInfoData, PaymentDetailsWsDTO.class, fields);
 	}
 
-	@Secured({ "ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
-	@RequestMapping(value = "/{cartId}/paymentdetails", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE,
-			MediaType.APPLICATION_XML_VALUE })
+	@Secured(
+	{ "ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
+	@RequestMapping(value = "/{cartId}/paymentdetails", method = RequestMethod.POST, consumes =
+	{ MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
 	@ResponseStatus(HttpStatus.CREATED)
 	@ResponseBody
 	@ApiOperation(nickname = "createCartPaymentDetails", value = "Defines and assigns details of a new credit card payment to the cart.", notes = "Defines the details of a new credit card, and assigns this payment option to the cart.")
 	@ApiBaseSiteIdUserIdAndCartIdParam
-	public PaymentDetailsWsDTO createCartPaymentDetails(@ApiParam(value =
-			"Request body parameter that contains details such as the name on the card (accountHolderName), the card number (cardNumber), the card type (cardType.code), "
+	public PaymentDetailsWsDTO createCartPaymentDetails(
+			@ApiParam(value = "Request body parameter that contains details such as the name on the card (accountHolderName), the card number (cardNumber), the card type (cardType.code), "
 					+ "the month of the expiry date (expiryMonth), the year of the expiry date (expiryYear), whether the payment details should be saved (saved), whether the payment details "
 					+ "should be set as default (defaultPaymentInfo), and the billing address (billingAddress.firstName, billingAddress.lastName, billingAddress.titleCode, billingAddress.country.isocode, "
-					+ "billingAddress.line1, billingAddress.line2, billingAddress.town, billingAddress.postalCode, billingAddress.region.isocode)\n\nThe DTO is in XML or .json format.", required = true) @RequestBody final PaymentDetailsWsDTO paymentDetails,
-			@ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields)
-			throws InvalidPaymentInfoException, NoCheckoutCartException, UnsupportedRequestException
+					+ "billingAddress.line1, billingAddress.line2, billingAddress.town, billingAddress.postalCode, billingAddress.region.isocode)\n\nThe DTO is in XML or .json format.", required = true)
+			@RequestBody
+			final PaymentDetailsWsDTO paymentDetails, @ApiFieldsParam
+			@RequestParam(defaultValue = DEFAULT_FIELD_SET)
+			final String fields) throws InvalidPaymentInfoException, NoCheckoutCartException, UnsupportedRequestException
 	{
 		paymentProviderRequestSupportedStrategy.checkIfRequestSupported("addPaymentDetails");
 		validatePayment(paymentDetails);
@@ -894,28 +1014,30 @@ public class CartsController extends BaseCommerceController
 		validate(paymentDetails, "paymentDetails", getPaymentDetailsDTOValidator());
 	}
 
-	@Secured({ "ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
+	@Secured(
+	{ "ROLE_CUSTOMERGROUP", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
 	@RequestMapping(value = "/{cartId}/paymentdetails", method = RequestMethod.PUT)
 	@ResponseStatus(HttpStatus.OK)
 	@ApiOperation(nickname = "replaceCartPaymentDetails", value = "Sets credit card payment details for the cart.", notes = "Sets credit card payment details for the cart.")
 	@ApiBaseSiteIdUserIdAndCartIdParam
-	public void replaceCartPaymentDetails(
-			@ApiParam(value = "Payment details identifier.", required = true) @RequestParam final String paymentDetailsId)
-			throws InvalidPaymentInfoException
+	public void replaceCartPaymentDetails(@ApiParam(value = "Payment details identifier.", required = true)
+	@RequestParam
+	final String paymentDetailsId) throws InvalidPaymentInfoException
 	{
 		super.setPaymentDetailsInternal(paymentDetailsId);
 	}
 
-	@Secured({ "ROLE_CUSTOMERGROUP", "ROLE_CLIENT", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
+	@Secured(
+	{ "ROLE_CUSTOMERGROUP", "ROLE_CLIENT", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
 	@RequestMapping(value = "/{cartId}/promotions", method = RequestMethod.GET)
 	@ResponseBody
-	@ApiOperation(nickname = "getCartPromotions", value = "Get information about promotions applied on cart.", notes =
-			"Returns information about the promotions applied on the cart. "
-					+ "Requests pertaining to promotions have been developed for the previous version of promotions and vouchers, and as a result, some of them "
-					+ "are currently not compatible with the new promotions engine.")
+	@ApiOperation(nickname = "getCartPromotions", value = "Get information about promotions applied on cart.", notes = "Returns information about the promotions applied on the cart. "
+			+ "Requests pertaining to promotions have been developed for the previous version of promotions and vouchers, and as a result, some of them "
+			+ "are currently not compatible with the new promotions engine.")
 	@ApiBaseSiteIdUserIdAndCartIdParam
-	public PromotionResultListWsDTO getCartPromotions(
-			@ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields)
+	public PromotionResultListWsDTO getCartPromotions(@ApiFieldsParam
+	@RequestParam(defaultValue = DEFAULT_FIELD_SET)
+	final String fields)
 	{
 		LOG.debug("getCartPromotions");
 		final List<PromotionResultData> appliedPromotions = new ArrayList<>();
@@ -929,17 +1051,19 @@ public class CartsController extends BaseCommerceController
 		return getDataMapper().map(dataList, PromotionResultListWsDTO.class, fields);
 	}
 
-	@Secured({ "ROLE_CUSTOMERGROUP", "ROLE_CLIENT", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
+	@Secured(
+	{ "ROLE_CUSTOMERGROUP", "ROLE_CLIENT", "ROLE_GUEST", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT" })
 	@RequestMapping(value = "/{cartId}/promotions/{promotionId}", method = RequestMethod.GET)
 	@ResponseBody
-	@ApiOperation(nickname = "getCartPromotion", value = "Get information about promotion applied on cart.", notes =
-			"Returns information about a promotion (with a specific promotionId), that has "
-					+ "been applied on the cart. Requests pertaining to promotions have been developed for the previous version of promotions and vouchers, and as a result, some "
-					+ "of them are currently not compatible with the new promotions engine.")
+	@ApiOperation(nickname = "getCartPromotion", value = "Get information about promotion applied on cart.", notes = "Returns information about a promotion (with a specific promotionId), that has "
+			+ "been applied on the cart. Requests pertaining to promotions have been developed for the previous version of promotions and vouchers, and as a result, some "
+			+ "of them are currently not compatible with the new promotions engine.")
 	@ApiBaseSiteIdUserIdAndCartIdParam
-	public PromotionResultListWsDTO getCartPromotion(
-			@ApiParam(value = "Promotion identifier (code)", required = true) @PathVariable final String promotionId,
-			@ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields)
+	public PromotionResultListWsDTO getCartPromotion(@ApiParam(value = "Promotion identifier (code)", required = true)
+	@PathVariable
+	final String promotionId, @ApiFieldsParam
+	@RequestParam(defaultValue = DEFAULT_FIELD_SET)
+	final String fields)
 	{
 		LOG.debug("getCartPromotion: promotionId = {}", sanitize(promotionId));
 		final List<PromotionResultData> appliedPromotions = new ArrayList<>();
@@ -965,45 +1089,49 @@ public class CartsController extends BaseCommerceController
 		return getDataMapper().map(dataList, PromotionResultListWsDTO.class, fields);
 	}
 
-	@Secured({ "ROLE_TRUSTED_CLIENT" })
+	@Secured(
+	{ "ROLE_TRUSTED_CLIENT" })
 	@RequestMapping(value = "/{cartId}/promotions", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
-	@ApiOperation(nickname = "doApplyCartPromotion", value = "Enables promotions based on the promotionsId of the cart.", notes =
-			"Enables a promotion for the order based on the promotionId defined for the cart. "
-					+ "Requests pertaining to promotions have been developed for the previous version of promotions and vouchers, and as a result, some of them are currently not compatible "
-					+ "with the new promotions engine.", authorizations = { @Authorization(value = "oauth2_client_credentials") })
+	@ApiOperation(nickname = "doApplyCartPromotion", value = "Enables promotions based on the promotionsId of the cart.", notes = "Enables a promotion for the order based on the promotionId defined for the cart. "
+			+ "Requests pertaining to promotions have been developed for the previous version of promotions and vouchers, and as a result, some of them are currently not compatible "
+			+ "with the new promotions engine.", authorizations =
+	{ @Authorization(value = "oauth2_client_credentials") })
 	@ApiBaseSiteIdUserIdAndCartIdParam
-	public void doApplyCartPromotion(
-			@ApiParam(value = "Promotion identifier (code)", required = true) @RequestParam(required = true) final String promotionId)
-			throws CommercePromotionRestrictionException
+	public void doApplyCartPromotion(@ApiParam(value = "Promotion identifier (code)", required = true)
+	@RequestParam(required = true)
+	final String promotionId) throws CommercePromotionRestrictionException
 	{
 		LOG.debug("doApplyCartPromotion: promotionId = {}", sanitize(promotionId));
 		commercePromotionRestrictionFacade.enablePromotionForCurrentCart(promotionId);
 	}
 
-	@Secured({ "ROLE_TRUSTED_CLIENT" })
+	@Secured(
+	{ "ROLE_TRUSTED_CLIENT" })
 	@RequestMapping(value = "/{cartId}/promotions/{promotionId}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
-	@ApiOperation(nickname = "removeCartPromotion", value = "Disables the promotion based on the promotionsId of the cart.", notes =
-			"Disables the promotion for the order based on the promotionId defined for the cart. "
-					+ "Requests pertaining to promotions have been developed for the previous version of promotions and vouchers, and as a result, some of them are currently not compatible with "
-					+ "the new promotions engine.", authorizations = { @Authorization(value = "oauth2_client_credentials") })
+	@ApiOperation(nickname = "removeCartPromotion", value = "Disables the promotion based on the promotionsId of the cart.", notes = "Disables the promotion for the order based on the promotionId defined for the cart. "
+			+ "Requests pertaining to promotions have been developed for the previous version of promotions and vouchers, and as a result, some of them are currently not compatible with "
+			+ "the new promotions engine.", authorizations =
+	{ @Authorization(value = "oauth2_client_credentials") })
 	@ApiBaseSiteIdUserIdAndCartIdParam
-	public void removeCartPromotion(
-			@ApiParam(value = "Promotion identifier (code)", required = true) @PathVariable final String promotionId)
-			throws CommercePromotionRestrictionException
+	public void removeCartPromotion(@ApiParam(value = "Promotion identifier (code)", required = true)
+	@PathVariable
+	final String promotionId) throws CommercePromotionRestrictionException
 	{
 		LOG.debug("removeCartPromotion: promotionId = {}", sanitize(promotionId));
 		commercePromotionRestrictionFacade.disablePromotionForCurrentCart(promotionId);
 	}
 
-	@Secured({ "ROLE_CLIENT", "ROLE_CUSTOMERGROUP", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT", "ROLE_GUEST" })
+	@Secured(
+	{ "ROLE_CLIENT", "ROLE_CUSTOMERGROUP", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT", "ROLE_GUEST" })
 	@RequestMapping(value = "/{cartId}/vouchers", method = RequestMethod.GET)
 	@ResponseBody
 	@ApiOperation(nickname = "getCartVouchers", value = "Get a list of vouchers applied to the cart.", notes = "Returns a list of vouchers applied to the cart.")
 	@ApiBaseSiteIdUserIdAndCartIdParam
-	public VoucherListWsDTO getCartVouchers(
-			@ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields)
+	public VoucherListWsDTO getCartVouchers(@ApiFieldsParam
+	@RequestParam(defaultValue = DEFAULT_FIELD_SET)
+	final String fields)
 	{
 		LOG.debug("getVouchers");
 		final VoucherDataList dataList = new VoucherDataList();
@@ -1011,26 +1139,28 @@ public class CartsController extends BaseCommerceController
 		return getDataMapper().map(dataList, VoucherListWsDTO.class, fields);
 	}
 
-	@Secured({ "ROLE_CLIENT", "ROLE_CUSTOMERGROUP", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT", "ROLE_GUEST" })
+	@Secured(
+	{ "ROLE_CLIENT", "ROLE_CUSTOMERGROUP", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT", "ROLE_GUEST" })
 	@RequestMapping(value = "/{cartId}/vouchers", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
 	@ApiOperation(nickname = "doApplyCartVoucher", value = "Applies a voucher based on the voucherId defined for the cart.", notes = "Applies a voucher based on the voucherId defined for the cart.")
 	@ApiBaseSiteIdUserIdAndCartIdParam
-	public void doApplyCartVoucher(
-			@ApiParam(value = "Voucher identifier (code)", required = true) @RequestParam final String voucherId)
-			throws NoCheckoutCartException, VoucherOperationException
+	public void doApplyCartVoucher(@ApiParam(value = "Voucher identifier (code)", required = true)
+	@RequestParam
+	final String voucherId) throws NoCheckoutCartException, VoucherOperationException
 	{
 		super.applyVoucherForCartInternal(voucherId);
 	}
 
-	@Secured({ "ROLE_CLIENT", "ROLE_CUSTOMERGROUP", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT", "ROLE_GUEST" })
+	@Secured(
+	{ "ROLE_CLIENT", "ROLE_CUSTOMERGROUP", "ROLE_CUSTOMERMANAGERGROUP", "ROLE_TRUSTED_CLIENT", "ROLE_GUEST" })
 	@RequestMapping(value = "/{cartId}/vouchers/{voucherId}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
 	@ApiOperation(nickname = "removeCartVoucher", value = "Deletes a voucher defined for the current cart.", notes = "Deletes a voucher based on the voucherId defined for the current cart.")
 	@ApiBaseSiteIdUserIdAndCartIdParam
-	public void removeCartVoucher(
-			@ApiParam(value = "Voucher identifier (code)", required = true) @PathVariable final String voucherId)
-			throws NoCheckoutCartException, VoucherOperationException
+	public void removeCartVoucher(@ApiParam(value = "Voucher identifier (code)", required = true)
+	@PathVariable
+	final String voucherId) throws NoCheckoutCartException, VoucherOperationException
 	{
 		LOG.debug("release voucher : voucherCode = {}", sanitize(voucherId));
 		if (!getCheckoutFacade().hasCheckoutCart())
@@ -1040,13 +1170,16 @@ public class CartsController extends BaseCommerceController
 		getVoucherFacade().releaseVoucher(voucherId);
 	}
 
+	//occ webservices
+	@Secured(
+	{ "ROLE_CUSTOMERGROUP", "ROLE_TRUSTED_CLIENT" })
 	@PostMapping(path = "/{cartId}/validate")
 	@ResponseBody
 	@ApiOperation(nickname = "validateCart", value = "Validates the cart", notes = "Runs a cart validation and returns the result.")
 	@ApiBaseSiteIdUserIdAndCartIdParam
-	public CartModificationListWsDTO validateCart(
-			@ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields)
-			throws CommerceCartModificationException
+	public CartModificationListWsDTO validateCart(@ApiFieldsParam
+	@RequestParam(defaultValue = DEFAULT_FIELD_SET)
+	final String fields) throws CommerceCartModificationException
 	{
 		LOG.debug("validateCart");
 		final CartModificationDataList cartModificationDataList = new CartModificationDataList();
@@ -1069,8 +1202,8 @@ public class CartsController extends BaseCommerceController
 			return cartModifications;
 		}
 
-		final Predicate<CartModificationData> isNotVoucherModification = modification ->
-				!COUPON_STATUS_CODE.equals(modification.getStatusCode()) && !VOUCHER_STATUS_CODE.equals(modification.getStatusCode());
+		final Predicate<CartModificationData> isNotVoucherModification = modification -> !COUPON_STATUS_CODE
+				.equals(modification.getStatusCode()) && !VOUCHER_STATUS_CODE.equals(modification.getStatusCode());
 
 		return Collections.unmodifiableList(Stream.concat( //
 				cartModifications.stream().filter(isNotVoucherModification), //
