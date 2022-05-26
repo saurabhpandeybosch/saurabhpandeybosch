@@ -1,7 +1,13 @@
-
-
+//comment line no 6,7,8 for apparel products
 $productCatalog=apparelProductCatalog
 $productCatalogName=Apparel Product Catalog
+$warehouse=ap_warehouse_s
+
+$productCatalog=electronicsProductCatalog
+$productCatalogName=Electronics Product Catalog
+$warehouse=warehouse_s
+
+
 $catalogVersion=catalogversion(catalog(id[default=$productCatalog]),version[default='Staged'])[unique=true,default=$productCatalog:Staged]
 $baseProduct=baseProduct(code, catalogVersion(catalog(id[default='$productCatalog']),version[default='Staged']))
 # Language
@@ -9,7 +15,6 @@ $lang=en
 $approved=approvalstatus(code)[default='approved']
 
 INSERT_UPDATE Product;code[unique=true];name[lang=$lang];description[lang=$lang];summary[lang=$lang];$approved;$catalogVersion
-;8328;Painting;Wall decor;;
 ;11;Painting;Wall decor;;
 ;49;Earring;;;
 ;52;plant;;;
@@ -23,7 +28,6 @@ INSERT_UPDATE Product;code[unique=true];name[lang=$lang];description[lang=$lang]
 
 
 INSERT_UPDATE PriceRow;productId[unique=true];unit(code[unique=true,default=pieces]);currency(isocode)[unique=true];price;minqtd;unitFactor;net
-;8328;pieces;GBP;100;1;1;false
 ;11;pieces;GBP;1000;1;1;true
 ;49;pieces;GBP;1000;1;1;false
 ;52;pieces;GBP;1000;1;1;false
@@ -39,16 +43,13 @@ INSERT_UPDATE PriceRow;productId[unique=true];unit(code[unique=true,default=piec
 
 
 INSERT_UPDATE StockLevel;available[unique=true];warehouse(code)[unique=true];inStockStatus(code);maxPreOrder;maxStockLevelHistoryCount;overSelling;preOrder;productCode[unique=true];reserved
-;10;ap_warehouse_s;forceInStock;0;0;0;0;8328;0
-;20;London Theater;forceInStock;0;0;0;0;8328;0
-;5;London Theater;forceInStock;0;0;0;0;11;0
-;8;London Theater;forceInStock;0;0;0;0;49;0
-;10;London Theater;forceInStock;0;0;0;0;52;0
-;11;London Theater;forceInStock;0;0;0;0;53;0
-;10;London Theater;forceInStock;0;0;0;0;54;0
-;20;London Theater;forceInStock;0;0;0;0;55;0
-;8;London Theater;forceInStock;0;0;0;0;56;0
-;10;London Theater;forceInStock;0;0;0;0;57;0
-;11;London Theater;forceInStock;0;0;0;0;59;0
-;10;London Theater;forceInStock;0;0;0;0;60;0
-
+;5;$warehouse;forceInStock;0;0;0;0;11;0
+;8;$warehouse;forceInStock;0;0;0;0;49;0
+;10;$warehouse;forceInStock;0;0;0;0;52;0
+;11;$warehouse;forceInStock;0;0;0;0;53;0
+;10;$warehouse;forceInStock;0;0;0;0;54;0
+;20;$warehouse;forceInStock;0;0;0;0;55;0
+;8;$warehouse;forceInStock;0;0;0;0;56;0
+;10;$warehouse;forceInStock;0;0;0;0;57;0
+;11;$warehouse;forceInStock;0;0;0;0;59;0
+;10;$warehouse;forceInStock;0;0;0;0;60;0
