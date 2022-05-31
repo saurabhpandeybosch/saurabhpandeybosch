@@ -47,6 +47,10 @@ public class CeeaProductPopulator extends ProductPopulator
 			final ImageData imageData = getImageConverter().convert(media);
 			target.setCeeaThreeDimensionalImage(imageData);
 		}
+		final MediaModel primaryImg=source.getPicture();
+		if(null!=primaryImg) {
+			target.setPrimaryImgURL(primaryImg.getURL());
+		}
 		// super.populate(source, target);
 	}
 }

@@ -8,6 +8,7 @@
 		<property name="genders" type="java.util.List&lt;com.ceea.facades.product.data.GenderData>"/>
 		<property name="annotation" type="String"></property>
 		<property name="ceeaThreeDimensionalImage" type="de.hybris.platform.commercefacades.product.data.ImageData"/>
+		<property name="primaryImgURL" type="String"/>
 	</bean>
 
 	<bean class="com.ceea.facades.product.data.GenderData">
