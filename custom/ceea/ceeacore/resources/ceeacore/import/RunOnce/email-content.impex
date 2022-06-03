@@ -1,0 +1,9 @@
+UPDATE RendererTemplate;code[unique=true];contextClass;rendererType(code)[default='velocity']
+;electronics_Email_Order_Confirmation_Body;com.ceea.facades.process.email.context.OrderNotificationEmailContext
+;electronics_Email_Order_Confirmation_Subject;com.ceea.facades.process.email.context.OrderNotificationEmailContext
+
+
+
+UPDATE RendererTemplate;code[unique=true];contextClass;rendererType(code)[default='velocity']
+;apparel-uk_Email_Order_Confirmation_Body;com.ceea.facades.process.email.context.OrderNotificationEmailContext
+;apparel-uk_Email_Order_Confirmation_Subject;com.ceea.facades.process.email.context.OrderNotificationEmailContext
