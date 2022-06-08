@@ -1,0 +1,31 @@
+$contentCatalog=electronicsContentCatalog
+$contentCV=catalogVersion(CatalogVersion.catalog(Catalog.id[default=$contentCatalog]),CatalogVersion.version[default=Staged])[default=$contentCatalog:Staged]
+$wideContent=CMSImageComponent,BannerComponent,SimpleBannerComponent,CMSLinkComponent,CMSParagraphComponent
+$lang=en
+UPDATE GenericItem[processor=de.hybris.platform.commerceservices.impex.impl.ConfigPropertyImportProcessor];pk[unique=true]
+$emailResource=$config-emailResourceValue
+
+# Import modulegen config properties into impex macros
+UPDATE GenericItem[processor=de.hybris.platform.commerceservices.impex.impl.ConfigPropertyImportProcessor];pk[unique=true]
+$jarResourceCms=$config-jarResourceCmsValue
+$emailPackageName=$config-emailContextPackageName
+
+
+
+INSERT_UPDATE EmailPageTemplate;$contentCV[unique=true];uid[unique=true];name;active;frontendTemplateName;subject(code);htmlTemplate(code);restrictedPageTypes(code)
+;;OrderConfirmationEmailTemplate;Order Confirmation Email Template;true;orderConfirmationEmail;electronics_Email_Order_Confirmation_Subject;electronics_Email_Order_Confirmation_Body;EmailPage
+
+
+UPDATE EmailPageTemplate;$contentCV[unique=true];uid[unique=true];velocityTemplate[translator=de.hybris.platform.commerceservices.impex.impl.FileLoaderValueTranslator]
+;;OrderConfirmationEmailTemplate;$jarResourceCms/structure-view/structure_orderConfirmationEmailTemplate.vm
+
+
+
+
+INSERT_UPDATE EmailPage;$contentCV[unique=true];uid[unique=true];name;masterTemplate(uid,$contentCV);defaultPage;approvalStatus(code)[default='approved']
+;;OrderConfirmationEmail;Order Confirmation Email;OrderConfirmationEmailTemplate;true;
+
+
+UPDATE RendererTemplate;code[unique=true];description[lang=$lang];templateScript[lang=$lang,translator=de.hybris.platform.commerceservices.impex.impl.FileLoaderValueTranslator]
+;electronics_Email_Order_Confirmation_Body;"Order Confirmation Email Body";$emailResource/email-orderConfirmationBody.vm
+
