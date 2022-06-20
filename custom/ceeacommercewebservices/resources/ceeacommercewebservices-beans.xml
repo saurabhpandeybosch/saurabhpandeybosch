@@ -180,6 +180,7 @@
 		 <property name="ceeaThreeDimensionalImage" type="de.hybris.platform.commercewebservicescommons.dto.product.ImageWsDTO">
             <description>ceeaThreeDimensionalImage associated with variant option qualifier</description>
         </property>
+        <property name="primaryImgURL" type="String"/>
 	</bean>
 
 </beans>
