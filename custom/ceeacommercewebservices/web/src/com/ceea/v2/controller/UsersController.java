@@ -3,6 +3,7 @@
  */
 package com.ceea.v2.controller;
 
+import de.hybris.ceea.facades.CeeaCustomerFacade;
 import de.hybris.platform.commercefacades.customer.CustomerFacade;
 import de.hybris.platform.commercefacades.customergroups.CustomerGroupFacade;
 import de.hybris.platform.commercefacades.user.data.CustomerData;
@@ -21,15 +22,13 @@ import de.hybris.platform.webservicescommons.cache.CacheControlDirective;
 import de.hybris.platform.webservicescommons.swagger.ApiBaseSiteIdAndUserIdParam;
 import de.hybris.platform.webservicescommons.swagger.ApiBaseSiteIdParam;
 import de.hybris.platform.webservicescommons.swagger.ApiFieldsParam;
-import com.ceea.constants.YcommercewebservicesConstants;
-import com.ceea.populator.HttpRequestCustomerDataPopulator;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Locale;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
@@ -52,6 +51,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
+
+import com.ceea.constants.YcommercewebservicesConstants;
+import com.ceea.populator.HttpRequestCustomerDataPopulator;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -85,6 +87,9 @@ public class UsersController extends BaseCommerceController
 	private Validator guestConvertingDTOValidator;
 	@Resource(name = "passwordStrengthValidator")
 	private Validator passwordStrengthValidator;
+
+	@Resource(name = "ceeaCustomerFacade")
+	private CeeaCustomerFacade ceeaCustomerFacade;
 
 	@Secured({ "ROLE_CLIENT", "ROLE_TRUSTED_CLIENT", "ROLE_CUSTOMERMANAGERGROUP" })
 	@RequestMapping(method = RequestMethod.POST)
@@ -224,6 +229,7 @@ public class UsersController extends BaseCommerceController
 	}
 
 
+
 	@Secured({ "ROLE_CUSTOMERGROUP", "ROLE_TRUSTED_CLIENT", "ROLE_CUSTOMERMANAGERGROUP" })
 	@RequestMapping(value = "/{userId}", method = RequestMethod.GET)
 	@ResponseBody
@@ -232,10 +238,9 @@ public class UsersController extends BaseCommerceController
 	@ApiBaseSiteIdAndUserIdParam
 	public UserWsDTO getUser(@ApiFieldsParam @RequestParam(defaultValue = DEFAULT_FIELD_SET) final String fields)
 	{
-		final CustomerData customerData = customerFacade.getCurrentCustomer();
+		final CustomerData customerData = ceeaCustomerFacade.getCurrentCustomer();
 		return getDataMapper().map(customerData, UserWsDTO.class, fields);
 	}
-
 	/**
 	 * @deprecated since 2005. Please use {@link UsersController#replaceUser(UserWsDTO)} instead.
 	 */
