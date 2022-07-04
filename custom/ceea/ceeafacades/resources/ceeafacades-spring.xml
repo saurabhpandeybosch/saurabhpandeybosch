@@ -198,4 +198,32 @@
 		<property name="add" ref="ceeaProductPopulator"/>
 	</bean>
 	
+		<alias name="defaultCeeaUserFacadeImpl" alias="ceeaUserFacade"/>
+    <bean id="defaultCeeaUserFacadeImpl" class="de.hybris.ceea.facades.impl.DefaultCeeaUserFacadeImpl">
+        <property name="userService" ref="userService"/>
+        <property name="customerAccountService" ref="customerAccountService"/>
+        <property name="modelService" ref="modelService"/>
+        <property name="addressReversePopulator" ref="addressReversePopulator"/>
+        <property name="addressConverter" ref="addressConverter"/>
+        <property name="checkoutCustomerStrategy" ref="checkoutCustomerStrategy"/>
+    </bean>
+	
+	 <alias name="defaultCeeaCustomerPopulator" alias="ceeaCustomerPopulator"/>
+    <bean id="defaultCeeaCustomerPopulator"
+          class="com.ceea.facades.populators.CeeaCustomerPopulator"
+          parent="defaultCustomerPopulator">
+    </bean>
+	<bean parent="modifyPopulatorList">
+		<property name="list" ref="customerConverter"/>
+		<property name="add" ref="ceeaCustomerPopulator"/>
+	</bean>
+	
+	
+	
+	<alias name="defaultCeeaCustomerFacade" alias="ceeaCustomerFacade"/>
+    <bean id="defaultCeeaCustomerFacade" class="de.hybris.ceea.facades.impl.DefaultCeeaCustomerFacade">
+        <property name="userService" ref="userService"/>
+        <property name="customerConverter" ref="customerConverter"/>
+    </bean>
+	
 </beans>

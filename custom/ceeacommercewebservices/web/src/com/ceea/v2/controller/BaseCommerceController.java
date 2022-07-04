@@ -3,11 +3,15 @@
  */
 package com.ceea.v2.controller;
 
+import static com.ceea.constants.YcommercewebservicesConstants.ENUM_VALUES_SEPARATOR;
+
+import de.hybris.ceea.facades.CeeaUserFacade;
 import de.hybris.platform.commercefacades.order.CartFacade;
 import de.hybris.platform.commercefacades.order.CheckoutFacade;
 import de.hybris.platform.commercefacades.order.data.CCPaymentInfoData;
 import de.hybris.platform.commercefacades.order.data.CartData;
 import de.hybris.platform.commercefacades.order.data.CartModificationData;
+import de.hybris.platform.commercefacades.order.data.CartModificationDataList;
 import de.hybris.platform.commercefacades.user.UserFacade;
 import de.hybris.platform.commercefacades.user.data.AddressData;
 import de.hybris.platform.commercefacades.voucher.VoucherFacade;
@@ -43,7 +47,14 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
-import static com.ceea.constants.YcommercewebservicesConstants.ENUM_VALUES_SEPARATOR;
+import com.ceea.exceptions.InvalidPaymentInfoException;
+import com.ceea.exceptions.NoCheckoutCartException;
+import com.ceea.exceptions.UnsupportedDeliveryModeException;
+import com.ceea.populator.options.PaymentInfoOption;
+import com.ceea.validation.data.CartVoucherValidationData;
+import com.ceea.validation.data.CartVoucherValidationDataList;
+import com.ceea.validator.CartVoucherValidator;
+import com.ceea.validator.PlaceOrderCartValidator;
 
 
 public class BaseCommerceController extends BaseController
@@ -68,6 +79,10 @@ public class BaseCommerceController extends BaseController
 	private Validator addressDTOValidator;
 	@Resource(name = "userFacade")
 	private UserFacade userFacade;
+
+
+	@Resource(name = "ceeaUserFacade")
+	private CeeaUserFacade ceeaUserFacade;
 	@Resource(name = "ccPaymentInfoValidator")
 	private Validator ccPaymentInfoValidator;
 	@Resource(name = "paymentDetailsDTOValidator")
@@ -95,10 +110,10 @@ public class BaseCommerceController extends BaseController
 	{
 		addressData.setShippingAddress(true);
 		addressData.setVisibleInAddressBook(true);
-		userFacade.addAddress(addressData);
+		ceeaUserFacade.addAddress(addressData);
 		if (addressData.isDefaultAddress())
 		{
-			userFacade.setDefaultAddress(addressData);
+			ceeaUserFacade.setDefaultAddress(addressData);
 		}
 		return addressData;
 	}

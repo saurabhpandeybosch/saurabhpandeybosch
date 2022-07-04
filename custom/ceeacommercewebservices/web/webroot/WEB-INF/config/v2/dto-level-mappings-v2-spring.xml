@@ -150,20 +150,21 @@
         </property>
     </bean>
 
-    <bean parent="fieldSetLevelMapping" id="userWsDTOFieldSetLevelMapping">
+     <bean parent="fieldSetLevelMapping" id="userWsDTOFieldSetLevelMapping">
         <property name="dtoClass"
                   value="de.hybris.platform.commercewebservicescommons.dto.user.UserWsDTO"/>
         <property name="levelMapping">
             <map>
                 <entry key="BASIC"
-                       value="lastName,title,titleCode,displayUid,defaultAddress,language,firstName,currency,uid,name,customerId,deactivationDate"/>
+                       value="lastName,title,titleCode,displayUid,defaultAddress,language,firstName,currency,uid,name,customerId,deactivationDate,addresses"/>
                 <entry key="DEFAULT"
-                       value="lastName,title,titleCode,displayUid,defaultAddress(DEFAULT),language(DEFAULT),firstName,currency(DEFAULT),uid,name,customerId,deactivationDate"/>
+                       value="lastName,title,titleCode,displayUid,defaultAddress(DEFAULT),language(DEFAULT),firstName,currency(DEFAULT),uid,name,customerId,deactivationDate,addresses(DEFAULT)"/>
                 <entry key="FULL"
-                       value="lastName,title,titleCode,displayUid,defaultAddress(FULL),language(FULL),firstName,currency(FULL),uid,name,customerId,deactivationDate"/>
+                       value="lastName,title,titleCode,displayUid,defaultAddress(FULL),language(FULL),firstName,currency(FULL),uid,name,customerId,deactivationDate,addresses(FULL)"/>
             </map>
         </property>
     </bean>
+    
 
     <bean parent="fieldSetLevelMapping" id="titleWsDTOFieldSetLevelMapping">
         <property name="dtoClass"
