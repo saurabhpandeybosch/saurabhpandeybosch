@@ -51,6 +51,14 @@ public class CeeaProductPopulator extends ProductPopulator
 		if(null!=primaryImg) {
 			target.setPrimaryImgURL(primaryImg.getURL());
 		}
+		
+		target.setProductVideoUrl(source.getProductVideoUrl());
+		final MediaModel productPDF = source.getProductPDF();
+		if (productPDF != null)
+		{
+			final ImageData convert = getImageConverter().convert(productPDF);
+			target.setProductPDF(convert);
+		}
 		// super.populate(source, target);
 	}
 }

@@ -181,6 +181,13 @@
             <description>ceeaThreeDimensionalImage associated with variant option qualifier</description>
         </property>
         <property name="primaryImgURL" type="String"/>
+		
+		<property name="productVideoUrl" type="String">
+			<description>productVideoUrl </description>
+		</property>
+		 <property name="productPDF" type="de.hybris.platform.commercewebservicescommons.dto.product.ImageWsDTO">
+            <description>productPDF associated with variant option qualifier</description>
+        </property>
 	</bean>
 
 </beans>
