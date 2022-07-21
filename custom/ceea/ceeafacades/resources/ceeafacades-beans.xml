@@ -9,6 +9,9 @@
 		<property name="annotation" type="String"></property>
 		<property name="ceeaThreeDimensionalImage" type="de.hybris.platform.commercefacades.product.data.ImageData"/>
 		<property name="primaryImgURL" type="String"/>
+		
+		<property name="productVideoUrl" type="String"></property>
+		<property name="productPDF" type="de.hybris.platform.commercefacades.product.data.ImageData"/>
 	</bean>
 
 	<bean class="com.ceea.facades.product.data.GenderData">
