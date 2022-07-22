@@ -1,14 +1,18 @@
 package com.ceea.facades.populators;
 
-
+import com.ceea.facades.product.data.AnnotationData;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.hybris.platform.commercefacades.product.converters.populator.ProductPopulator;
 import de.hybris.platform.commercefacades.product.data.ImageData;
 import de.hybris.platform.commercefacades.product.data.ProductData;
 import de.hybris.platform.core.model.media.MediaModel;
 import de.hybris.platform.core.model.product.ProductModel;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
-
+import org.apache.commons.lang.StringUtils;
 import javax.annotation.Resource;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -60,6 +64,22 @@ public class CeeaProductPopulator extends ProductPopulator
 			target.setProductPDF(convert);
 		}
 		// super.populate(source, target);
+		try {
+			convertJsonToObject(target);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void convertJsonToObject(ProductData target) throws IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		AnnotationData[] readValue=null;
+		if(StringUtils.isNotEmpty(target.getAnnotation())){
+			readValue = mapper.readValue(target.getAnnotation(), AnnotationData[].class);
+			List<AnnotationData> list = Arrays.asList(readValue);
+			target.setAnnotationList(list);
+		}
+
 	}
 }
 
