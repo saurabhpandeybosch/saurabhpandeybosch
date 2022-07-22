@@ -9,10 +9,39 @@
 		<property name="annotation" type="String"></property>
 		<property name="ceeaThreeDimensionalImage" type="de.hybris.platform.commercefacades.product.data.ImageData"/>
 		<property name="primaryImgURL" type="String"/>
+		<property name="productVideoUrl" type="String"></property>
+		<property name="productPDF" type="de.hybris.platform.commercefacades.product.data.ImageData"/>
+		<property name="annotationList" type="java.util.List&lt;com.ceea.facades.product.data.AnnotationData>"/>
 	</bean>
 
 	<bean class="com.ceea.facades.product.data.GenderData">
 		<property name="code" type="String"/>
 		<property name="name" type="String"/>
 	</bean>
+	
+	<bean class="de.hybris.platform.commercefacades.user.data.CustomerData"
+	      extends="de.hybris.platform.commercefacades.user.data.PrincipalData">
+		
+		<property name="addresses"
+		          type="java.util.Collection&lt;de.hybris.platform.commercefacades.user.data.AddressData>"/>
+	</bean>
+	
+	<bean class="de.hybris.platform.commercewebservicescommons.dto.user.UserWsDTO"
+	extends="de.hybris.platform.commercewebservicescommons.dto.user.PrincipalWsDTO">
+		<property name="addresses"
+		          type="java.util.Collection&lt;de.hybris.platform.commercewebservicescommons.dto.user.AddressWsDTO&gt;"/>
+	</bean>
+	<bean class="com.ceea.facades.product.data.AnnotationData">
+		<property name="annotation" type="String"/>
+		<property name="position" type="com.ceea.facades.product.data.ThreeDimensionData"/>
+		<property name="rotation" type="com.ceea.facades.product.data.ThreeDimensionData"/>
+		<property name="scale" type="com.ceea.facades.product.data.ThreeDimensionData"/>
+	</bean>
+	<bean class="com.ceea.facades.product.data.ThreeDimensionData">
+		<property name="x" type="String"/>
+		<property name="y" type="String"/>
+		<property name="z" type="String"/>
+
+	</bean>
+
 </beans>

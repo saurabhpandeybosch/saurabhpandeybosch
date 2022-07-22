@@ -174,12 +174,33 @@
 	
 	<bean
 		class="de.hybris.platform.commercewebservicescommons.dto.product.ProductWsDTO">
-		<property name="annotation" type="String">
+	<!--	<property name="annotation" type="String">
 			<description>annotation </description>
-		</property>
+		</property>-->
 		 <property name="ceeaThreeDimensionalImage" type="de.hybris.platform.commercewebservicescommons.dto.product.ImageWsDTO">
             <description>ceeaThreeDimensionalImage associated with variant option qualifier</description>
         </property>
+        <property name="primaryImgURL" type="String"/>
+		
+		<property name="productVideoUrl" type="String">
+			<description>productVideoUrl </description>
+		</property>
+		 <property name="productPDF" type="de.hybris.platform.commercewebservicescommons.dto.product.ImageWsDTO">
+            <description>productPDF associated with variant option qualifier</description>
+        </property>
+		<property name="annotationList" type="java.util.List&lt;com.ceea.product.data.AnnotationWsDTO>"/>
+	</bean>
+
+	<bean class="com.ceea.product.data.AnnotationWsDTO">
+		<property name="annotation" type="String"/>
+		<property name="position" type="com.ceea.product.data.ThreeDimensionWsDTO"/>
+		<property name="rotation" type="com.ceea.product.data.ThreeDimensionWsDTO"/>
+		<property name="scale" type="com.ceea.product.data.ThreeDimensionWsDTO"/>
+	</bean>
+	<bean class="com.ceea.product.data.ThreeDimensionWsDTO">
+		<property name="x" type="String"/>
+		<property name="y" type="String"/>
+		<property name="z" type="String"/>
 	</bean>
 
 </beans>
