@@ -9,6 +9,9 @@ import de.hybris.platform.core.model.media.MediaModel;
 import de.hybris.platform.core.model.product.ProductModel;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.Arrays;
@@ -21,6 +24,8 @@ import java.util.List;
  */
 public class CeeaProductPopulator extends ProductPopulator
 {
+	private static final Logger LOG = LoggerFactory.getLogger(CeeaProductPopulator.class);
+
 	@Resource
 	private Converter<MediaModel, ImageData> imageConverter;
 
@@ -67,7 +72,7 @@ public class CeeaProductPopulator extends ProductPopulator
 		try {
 			convertJsonToObject(target);
 		} catch (IOException e) {
-			e.printStackTrace();
+			LOG.info("Exception Occured :: "+e.getMessage());
 		}
 	}
 
