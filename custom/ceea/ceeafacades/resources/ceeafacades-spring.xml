@@ -226,4 +226,10 @@
         <property name="customerConverter" ref="customerConverter"/>
     </bean>
 	
+	
+	<alias name="ceeaPLPPopulator" alias="commerceSearchResultProductPopulator"/>
+    <bean id="ceeaPLPPopulator"
+          class="com.ceea.facades.populators.CeeaPLPPopulator"
+          parent="variantCommerceSearchResultProductPopulator">
+    </bean>
 </beans>
