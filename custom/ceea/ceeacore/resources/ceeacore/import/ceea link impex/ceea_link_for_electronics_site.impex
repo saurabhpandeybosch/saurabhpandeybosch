@@ -1,0 +1,98 @@
+
+$contentCatalog=electronicsContentCatalog
+$contentCV=catalogVersion(CatalogVersion.catalog(Catalog.id[default=$contentCatalog]),CatalogVersion.version[default=Online])[default=$contentCatalog:Online]
+$siteResource=jar:de.hybris.platform.electronicsstore.constants.ElectronicsstoreConstants&/electronicsstore/import/sampledata/contentCatalogs/$contentCatalog
+$jarResourceCms=jar:de.hybris.platform.electronicsstore.constants.ElectronicsstoreConstants&/electronicsstore/import/sampledata/cockpits/cmscockpit
+$productCatalog=electronicsProductCatalog
+$productCatalogName=Electronnics Product Catalog
+$productCV=catalogVersion(catalog(id[default=$productCatalog]),version[default='Online'])[unique=true,default=$productCatalog:Online]
+$picture=media(code, $contentCV)
+$lang=en
+
+
+
+# Import modulegen config properties into impex macros
+UPDATE GenericItem[processor=de.hybris.platform.commerceservices.impex.impl.ConfigPropertyImportProcessor];pk[unique=true]
+$jarResourceCms=$config-jarResourceCmsValue
+
+
+# .Add velocity template
+UPDATE PageTemplate;$contentCV[unique=true];uid[unique=true];velocityTemplate[translator=de.hybris.platform.commerceservices.impex.impl.FileLoaderValueTranslator]
+;;CeeaPageTemplate ;$jarResourceCms/structure-view/structure_upload3DPageTemplate.vm
+
+
+
+#1.create a new page template:
+INSERT_UPDATE PageTemplate;$contentCV[unique=true];uid[unique=true];name;frontendTemplateName;restrictedPageTypes(code);active[default=true]
+;;CeeaPageTemplate;Ceea Page Template;product3DUpload/ceeaLayoutPage;ContentPage
+
+
+
+#2.Create content slot names required for the template
+INSERT_UPDATE ContentSlotName;name[unique=true];template(uid,$contentCV)[unique=true][default='CeeaPageTemplate'];validComponentTypes(code);compTypeGroup(code)
+;TopHeaderSlot;;;wide
+;SiteLogo;;;logo
+;HeaderLinks;;;headerlinks
+;SearchBox;;;searchbox
+;MiniCart;;;minicart
+;NavigationBar;;;navigation
+;ceeaParagraph;;;wide
+;Footer;;;footer
+
+
+#3.Create a new content page
+INSERT_UPDATE ContentPage;$contentCV[unique=true];uid[unique=true];name;masterTemplate(uid,$contentCV);label;defaultPage[default='true'];approvalStatus(code)[default='approved'];homepage[default='false']
+;;ceeaContentPage;Ceea Content Page;CeeaPageTemplate;ceeaCMSPage
+
+
+#4.Link the content slots with page template
+INSERT_UPDATE ContentSlotForTemplate;$contentCV[unique=true];uid[unique=true];position[unique=true];pageTemplate(uid,$contentCV)[unique=true][default='CeeaPageTemplate'];contentSlot(uid,$contentCV)[unique=true];allowOverwrite
+#;;SiteLogo-CeeaPage;SiteLogo;;SiteLogoSlot;true
+#;;HomepageLink-CeeaPage;HomepageNavLink;;HomepageNavLinkSlot;true
+#;;NavigationBar-CeeaPage;NavigationBar;;NavigationBarSlot;true
+#;;MiniCart-CeeaPage;MiniCart;;MiniCartSlot;true
+#;;Footer-CeeaPage;Footer;;FooterSlot;true
+#;;HeaderLinks-CeeaPage;HeaderLinks;;HeaderLinksSlot;true
+#;;SearchBox-CeeaPage;SearchBox;;SearchBoxSlot;true
+#;;TopHeaderSlot-CeeaPage;TopHeaderSlot;;TopHeaderSlot;true
+#;;BottomHeaderSlot-CeeaPage;BottomHeaderSlot;;BottomHeaderSlot;true
+#;;PlaceholderContentSlot-CeeaPage;PlaceholderContentSlot;;PlaceholderContentSlot;true
+;;ceeaParagraphSlot-ceeaPage;ceeaParagraph;;ceeaParagraphSlot;true
+
+
+#5.Create components and link them with content slots
+INSERT_UPDATE CMSParagraphComponent;$contentCV[unique=true];uid[unique=true];name;&componentRef;;;;content;
+;;ceeaHeadingComponent;Ceea Heading information;ceeaHeadingComponent;;;;This is a ceea page;
+
+
+#6.Create the link component
+INSERT_UPDATE CMSLinkComponent;$contentCV[unique=true];uid[unique=true];name;url;category(code, $productCV);target(code)[default='sameWindow'];;
+;;ceeaLink;Ceea Link;/ceea;;;;
+
+
+#7.Create content slots and add the components to the content slots
+INSERT_UPDATE ContentSlot;$contentCV[unique=true];uid[unique=true];name;active;cmsComponents(uid,$contentCV)
+;;ceeaParagraphSlot;Ceea Paragraph Slot;true;ceeaHeadingComponent
+
+
+#8.Create navigation node
+INSERT_UPDATE CMSNavigationNode;uid[unique=true];$contentCV[unique=true];name;&nodeRef;
+;CeeaNavigationNavNode;;Ceea Navigation Node;CeeaNavigationNavNode
+
+
+#9.Create navigation node and add the cms link component
+UPDATE CMSNavigationNode;uid[unique=true];$contentCV[unique=true];children(uid,$contentCV)[mode=append]
+;ElectronicsCategoryNavNode;;CeeaNavigationNavNode;
+
+
+# 10. Entries of the above navigation nodes ##
+INSERT_UPDATE CMSNavigationEntry;uid[unique=true];$contentCV[unique=true];name;navigationNode(&nodeRef);item(CMSLinkComponent.uid,CMSLinkComponent.$contentCV);
+;CeeaNavNodeEntry;;ceeaproduct Navigation Node Entry;CeeaNavigationNavNode;ceeaLink;
+
+
+# 11.Add the language for the newly created navigation node and cms link component.
+UPDATE CMSNavigationNode;$contentCV[unique=true];uid[unique=true];title[lang=en]
+;;CeeaNavigationNavNode;"Ceea"
+UPDATE CMSLinkComponent;$contentCV[unique=true];uid[unique=true];linkName[lang=en]
+;;ceeaLink;"Ceea"
+
