@@ -521,6 +521,22 @@
             </map>
         </property>
     </bean>
+    
+    <!-- custom wsdto -->
+    <bean parent="fieldSetLevelMapping" id="customProductWsDTOFieldSetLevelMapping">
+        <property name="dtoClass"
+                  value="com.ceea.dto.product.customWSDTO.CustomProductWSDTO"/>
+        <property name="levelMapping">
+            <map>
+                <entry key="BASIC"
+                       value="code,name,approvalStatus,catalogVersion,catalogId,hotspot,categoryid,productManual,productWarranty,productFeatures,productModel,productCompany,productPreview,productAuthor,seller,fullfilmentCriteria,quantity,price,paymentMode,currency,productDescription,productSpecification"/>
+                <entry key="DEFAULT"
+                       value="code(DEFAULT),name(DEFAULT),approvalStatus(DEFAULT),catalogVersion(DEFAULT),catalogId(DEFAULT),hotspot(DEFAULT),categoryid(DEFAULT),productManual(DEFAULT),productWarranty(DEFAULT),productFeatures(DEFAULT),productModel(DEFAULT),productCompany(DEFAULT),productPreview(DEFAULT),productAuthor(DEFAULT),seller(DEFAULT),fullfilmentCriteria(DEFAULT),quantity(DEFAULT),price(DEFAULT),paymentMode(DEFAULT),currency(DEFAULT),productDescription(DEFAULT),productSpecification(DEFAULT)"/>
+                <entry key="FULL"
+                       value="code(FULL),name(FULL),approvalStatus(FULL),catalogVersion(FULL),catalogId(FULL),hotspot(FULL),categoryid(FULL),productManual(FULL),productWarranty(FULL),productFeatures(FULL),productModel(FULL),productCompany(FULL),productPreview(FULL),productAuthor(FULL),seller(FULL),fullfilmentCriteria(FULL),quantity(FULL),price(FULL),paymentMode(FULL),currency(FULL),productDescription(FULL),productSpecification(FULL)"/>
+            </map>
+        </property>
+    </bean>
 
     <bean parent="fieldSetLevelMapping" id="productListWsDTOFieldSetLevelMapping">
         <property name="dtoClass"

@@ -186,6 +186,11 @@
 	<bean id="custom3DFacade" class="de.hybris.ceea.facades.impl.Custom3DFacadeImpl">
 		<property name="upload3DImageProductService" ref="upload3DImageProductService"/>
 		<property name="productService" ref="productService"/>
+		<property name="modelService" ref="modelService"/>
+		<property name="catalogVersionService" ref="catalogVersionService"/>
+		<property name="customProductReverseConverter" ref="customProductReverseConverter"/>
+		<property name ="sessionService" ref="sessionService"/>
+		<property name ="searchRestrictionService" ref="searchRestrictionService"/>
 	</bean>
 	
 	 <alias name="defaultCeeaProductPopulator" alias="ceeaProductPopulator"/>
@@ -225,5 +230,22 @@
         <property name="userService" ref="userService"/>
         <property name="customerConverter" ref="customerConverter"/>
     </bean>
+    
+    <!-- New converter and populator for product creation/update api -->
+    <alias name = "defaultCustomProductReverseConverter" alias = "customProductReverseConverter"/>
+    <bean id = "defaultCustomProductReverseConverter" parent="abstractPopulatingConverter">
+    	<property name="targetClass" value="de.hybris.platform.core.model.product.ProductModel"/>
+    	<property name = "populators">
+    		<list>
+    			<ref bean ="customProductReversePopulator"/>    		
+    		</list>
+    	</property>
+    </bean>
+    
+    <alias name="defaultCustomProductReversePopulator" alias="customProductReversePopulator"/>
+	<bean id = "defaultCustomProductReversePopulator" 
+	class="com.ceea.facades.populators.CustomProductReversePopulator">
+	<property name="catalogVersionService" ref="catalogVersionService"/>
+	</bean>
 	
 </beans>

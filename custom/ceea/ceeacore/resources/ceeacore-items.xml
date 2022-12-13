@@ -49,6 +49,57 @@
                     	<persistence type="property"/>
                     	<modifiers read="true" write="true" search="true" optional="true"/>
                 	</attribute>
+                	
+                	<!-- custom attributes from ceea storefront for product creation and update -->
+                	<attribute  type="java.lang.String"  qualifier="categoryid">
+                    	<persistence type="property"/>
+                    	<modifiers read="true" write="true" search="true" optional="false"/>
+                	</attribute>
+                	<attribute  type="java.lang.String"  qualifier="productManual">
+                    	<persistence type="property"/>
+                    	<modifiers read="true" write="true" search="true" optional="true"/>
+                	</attribute>
+                	<attribute  type="java.lang.String"  qualifier="productWarranty">
+                    	<persistence type="property"/>
+                    	<modifiers read="true" write="true" search="true" optional="false"/>
+                	</attribute>
+                	<attribute  type="java.lang.String"  qualifier="productFeatures">
+                    	<persistence type="property"/>
+                    	<modifiers read="true" write="true" search="true" optional="true"/>
+                	</attribute>
+                	<attribute  type="java.lang.String"  qualifier="productModel">
+                    	<persistence type="property"/>
+                    	<modifiers read="true" write="true" search="true" optional="true"/>
+                	</attribute>
+                	<attribute  type="java.lang.String"  qualifier="productCompany">
+                    	<persistence type="property"/>
+                    	<modifiers read="true" write="true" search="true" optional="false"/>
+                	</attribute>
+                	<attribute  type="java.lang.String"  qualifier="productPreview">
+                    	<persistence type="property"/>
+                    	<modifiers read="true" write="true" search="true" optional="true"/>
+                	</attribute>
+                	<attribute  type="java.lang.String"  qualifier="productAuthor">
+                    	<persistence type="property"/>
+                    	<modifiers read="true" write="true" search="true" optional="true"/>
+                	</attribute>
+                	<attribute  type="java.lang.String"  qualifier="seller">
+                    	<persistence type="property"/>
+                    	<modifiers read="true" write="true" search="true" optional="true"/>
+                	</attribute>
+                	<attribute  type="java.lang.String"  qualifier="fullfilmentCriteria">
+                    	<persistence type="property"/>
+                    	<modifiers read="true" write="true" search="true" optional="true"/>
+                	</attribute>
+                	<attribute  type="java.lang.String"  qualifier="quantity">
+                    	<persistence type="property"/>
+                    	<modifiers read="true" write="true" search="true" optional="true"/>
+                	</attribute>
+                	<attribute  type="java.lang.String"  qualifier="paymentMode">
+                    	<persistence type="property"/>
+                    	<modifiers read="true" write="true" search="true" optional="true"/>
+                	</attribute>
+                	
 			</attributes>
 		</itemtype>
         <!-- Add your item definitions here -->

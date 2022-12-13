@@ -189,10 +189,12 @@
             <description>productPDF associated with variant option qualifier</description>
         </property>
 		<property name="annotationList" type="java.util.List&lt;com.ceea.product.data.AnnotationWsDTO>"/>
+		
 	</bean>
 	<bean class="com.ceea.product.data.AnnotationWsDTO">
-		<property name="annotation" type="String"/>
-		<property name="position" type="com.ceea.product.data.ThreeDimensionWsDTO"/>
+		<property name= "hotspotId" type="String"/>
+		<property name= "text" type="String"/>
+		<property name="transform" type="com.ceea.product.data.ThreeDimensionWsDTO"/>
 		<property name="rotation" type="com.ceea.product.data.ThreeDimensionWsDTO"/>
 		<property name="scale" type="com.ceea.product.data.ThreeDimensionWsDTO"/>
 	</bean>
@@ -200,5 +202,30 @@
 		<property name="x" type="String"/>
 		<property name="y" type="String"/>
 		<property name="z" type="String"/>
+	</bean>
+	
+	<bean class="com.ceea.dto.product.customWSDTO.CustomProductWSDTO"> 
+	<property name="code" type="String"/>
+	<property name="name" type="String"/>
+	<property name="catalogId" type="String"/>
+	<property name="catalogVersion" type="String"/>
+	<property name="hotspot" type="com.ceea.product.data.AnnotationWsDTO"/>
+	<!-- <property name="productCreated" type="java.util.Date"/> -->
+	<property name="categoryid" type="String"/>
+	<property name="productManual" type="String"/>
+	<property name="productWarranty" type="String"/>
+	<property name="productFeatures" type="String"/>
+	<property name="productModel" type="String"/>
+	<property name="productCompany" type="String"/>
+	<property name="productPreview" type="String"/>
+	<property name="productAuthor" type="String"/>
+	<property name="seller" type="String"/>
+	<property name="fullfilmentCriteria" type="String"/>
+	<property name="quantity" type="String"/>
+	<property name="price" type="String"/>
+	<property name="paymentMode" type="String"/>
+	<property name="currency" type="String"/>
+	<property name="productDescription" type="String"/>
+	<property name="productSpecification" type="String"/>
 	</bean>
 </beans>
