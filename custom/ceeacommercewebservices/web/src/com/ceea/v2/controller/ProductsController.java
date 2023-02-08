@@ -1,6 +1,3 @@
-/*
- * Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved.
- */
 package com.ceea.v2.controller;
 
 import de.hybris.ceea.facades.Custom3DFacade;
@@ -19,6 +16,7 @@ import de.hybris.platform.commercefacades.search.data.AutocompleteSuggestionData
 import de.hybris.platform.commercefacades.search.data.SearchStateData;
 import de.hybris.platform.commercefacades.storefinder.StoreFinderStockFacade;
 import de.hybris.platform.commercefacades.storefinder.data.StoreFinderStockSearchPageData;
+import de.hybris.platform.commerceservices.customer.DuplicateUidException;
 import de.hybris.platform.commerceservices.search.facetdata.ProductSearchPageData;
 import de.hybris.platform.commerceservices.search.pagedata.PageableData;
 import de.hybris.platform.commerceservices.store.data.GeoPoint;
@@ -58,6 +56,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.annotation.Secured;
@@ -70,7 +69,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
+import com.ceea.dto.product.customWSDTO.CustomProductWSDTO;
+import com.ceea.facades.product.data.CustomProductData;
 import com.ceea.formatters.WsDateFormatter;
 import com.ceea.product.data.ReviewDataList;
 import com.ceea.product.data.SuggestionDataList;
@@ -521,6 +525,97 @@ public class ProductsController extends BaseController
 			}
 		}
 		return catalogInfo;
+	}
+
+	//new method for the 3d upload
+	@Secured(
+	{ "ROLE_CEEAWEBSITEMANAGERGROUP" })
+	@RequestMapping(value = "/{productCode}/upload3DImage", method = RequestMethod.POST, consumes =
+	{ MediaType.MULTIPART_FORM_DATA_VALUE }, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseStatus(HttpStatus.CREATED)
+	@ResponseBody
+	@ApiOperation(nickname = "uploading3D", value = "uploading 3d image", notes = "Uploads a three D image to the product and limits the size of image to a specific value of the max parameter.")
+	@ApiBaseSiteIdParam
+	public ProductWsDTO Upload3DImage(@ApiParam(value = "product code", required = true)
+	@PathVariable("productCode")
+	final String code, @ApiParam(value = "3d image that is to be uploaded")
+	@RequestParam(value = "image")
+	final MultipartFile image, @ApiFieldsParam
+	@RequestParam(defaultValue = DEFAULT_FIELD_SET)
+	final String fields)
+	{
+		//final AnnotationData annotationData = getDataMapper().map(annotation, AnnotationData.class, "");
+		final String setProduct3DImageAndAnnotationByCode = custom3DFacade.setProduct3DImageAndAnnotationByCode(code, image);
+
+		return getDataMapper().map(setProduct3DImageAndAnnotationByCode, ProductWsDTO.class);
+	}
+
+
+
+	@Bean
+	public MultipartResolver multipartResolver()
+	{
+		final CommonsMultipartResolver commonsMultipartResolver = new CommonsMultipartResolver();
+		commonsMultipartResolver.setMaxUploadSize(112400000);
+		commonsMultipartResolver.setDefaultEncoding("UTF-8");
+		return commonsMultipartResolver;
+	}
+
+	/*
+	 * @Secured( { "ROLE_CEEAWEBSITEMANAGERGROUP" })
+	 */
+
+
+	@Secured(
+	{ "ROLE_CEEAWEBSITEMANAGERGROUP" })
+	@RequestMapping(value = "/{productCode}/upload2DImage", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	@ApiOperation(nickname = "uploading2D", value = "uploading 2d image", notes = "Uploads a two D image to the product and limits the size of image to a specific value of the max parameter.")
+	@ApiBaseSiteIdParam
+	public ProductWsDTO Upload2DImage(@ApiParam(value = "product code", required = true)
+	@PathVariable("productCode")
+	final String code, @ApiParam(value = "2d image that is to be uploaded")
+	@RequestParam(value = "image")
+	final MultipartFile image, @ApiFieldsParam
+	@RequestParam(defaultValue = DEFAULT_FIELD_SET)
+	final String fields)
+	{
+
+		final String setProduct2DImageByCode = custom3DFacade.setProduct2DImageByCode(code, image);
+
+		return getDataMapper().map(setProduct2DImageByCode, ProductWsDTO.class, fields);
+	}
+
+	@Secured(
+	{ "ROLE_CEEAWEBSITEMANAGERGROUP" })
+	@RequestMapping(value = "/{productCode}/productCreationOrUpdate", method = RequestMethod.POST, consumes =
+	{ MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE }, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	@ApiOperation(nickname = "Product Creation/Update", value = "Product Creation/Update", notes = "Creating the new product or modifying the existing product")
+	@ApiBaseSiteIdParam
+	public CustomProductWSDTO productCreationOrUpdate(@ApiParam(value = "Product's Model", required = true)
+	@RequestBody
+	final CustomProductWSDTO product, @ApiFieldsParam
+	@RequestParam(defaultValue = DEFAULT_FIELD_SET)
+	final String fields)
+	{
+
+		//validate(product, "product",productDTOValidator);
+		final CustomProductData productData = getDataMapper().map(product, CustomProductData.class,
+				"code, name, catalogId, catalogVersion, hotspot, productDescription, productSpecification, categoryid, productManual, productWarranty, productFeatures, productModel, productCompany, productPreview, productAuthor, seller, fullfilmentCriteria, quantity, price, paymentMode, currency");
+		final boolean productExists = false;
+
+		String productCreation = null;
+		try
+		{
+			productCreation = custom3DFacade.productCreate(productData);
+		}
+		catch (final DuplicateUidException e)
+		{
+			e.printStackTrace();
+		}
+
+		return getDataMapper().map(productCreation, CustomProductWSDTO.class);
 	}
 
 }
