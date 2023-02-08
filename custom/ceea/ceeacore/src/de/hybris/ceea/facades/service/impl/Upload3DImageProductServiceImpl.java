@@ -3,31 +3,26 @@
  */
 package de.hybris.ceea.facades.service.impl;
 
-import static de.hybris.platform.servicelayer.util.ServicesUtil.validateIfSingleResult;
-import static java.lang.String.format;
-
 import de.hybris.ceea.core.event.Ceea3DImageSubmitEvent;
 import de.hybris.ceea.facades.service.Upload3DImageProductService;
 import de.hybris.platform.catalog.CatalogVersionService;
-import de.hybris.platform.catalog.model.CatalogVersionModel;
 import de.hybris.platform.core.model.media.MediaModel;
 import de.hybris.platform.core.model.product.ProductModel;
 import de.hybris.platform.product.ProductService;
+import de.hybris.platform.search.restriction.SearchRestrictionService;
 import de.hybris.platform.servicelayer.event.EventService;
+import de.hybris.platform.servicelayer.exceptions.UnknownIdentifierException;
 import de.hybris.platform.servicelayer.media.MediaService;
 import de.hybris.platform.servicelayer.model.ModelService;
+import de.hybris.platform.servicelayer.session.SessionExecutionBody;
+import de.hybris.platform.servicelayer.session.SessionService;
 
+import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.ceea.core.product.dao.CustomProductDao;
-import com.ceea.facades.product.data.AnnotationData;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 
@@ -51,24 +46,6 @@ public class Upload3DImageProductServiceImpl implements Upload3DImageProductServ
 	private ProductService productService;
 	private EventService eventService;
 	private CatalogVersionService catalogVersionService;
-	private CustomProductDao customProductDao;
-
-	/**
-	 * @return the customProductDao
-	 */
-	public CustomProductDao getCustomProductDao()
-	{
-		return customProductDao;
-	}
-
-	/**
-	 * @param customProductDao
-	 *           the customProductDao to set
-	 */
-	public void setCustomProductDao(final CustomProductDao customProductDao)
-	{
-		this.customProductDao = customProductDao;
-	}
 
 	/**
 	 * @return the catalogVersionService
@@ -176,14 +153,53 @@ public class Upload3DImageProductServiceImpl implements Upload3DImageProductServ
 		this.productService = productService;
 	}
 
+	private SessionService sessionService;
+
+	private SearchRestrictionService searchRestrictionService;
+
+	/**
+	 * @return the sessionService
+	 */
+	public SessionService getSessionService()
+	{
+		return sessionService;
+	}
+
+	/**
+	 * @param sessionService
+	 *           the sessionService to set
+	 */
+	public void setSessionService(final SessionService sessionService)
+	{
+		this.sessionService = sessionService;
+	}
+
+	/**
+	 * @return the searchRestrictionService
+	 */
+	public SearchRestrictionService getSearchRestrictionService()
+	{
+		return searchRestrictionService;
+	}
+
+	/**
+	 * @param searchRestrictionService
+	 *           the searchRestrictionService to set
+	 */
+	public void setSearchRestrictionService(final SearchRestrictionService searchRestrictionService)
+	{
+		this.searchRestrictionService = searchRestrictionService;
+	}
 
 	@Override
 	public String setProduct3DImageByCode(final String code, final MultipartFile file, final String annotation)
 	{
 
+		ProductModel searchProduct = null;
+		MediaModel mediaModel = null;
 		try (final InputStream inputStream = file.getInputStream())
 		{
-			final MediaModel mediaModel = modelService.create(MediaModel.class);
+			mediaModel = modelService.create(MediaModel.class);
 
 			mediaModel.setCode(code + "-" + System.currentTimeMillis());
 			mediaModel.setRealFileName(file.getOriginalFilename());
@@ -194,38 +210,73 @@ public class Upload3DImageProductServiceImpl implements Upload3DImageProductServ
 			modelService.save(mediaModel);
 			modelService.refresh(mediaModel);
 
-			final ProductModel productmodel = productService.getProductForCode(code);
+			searchProduct = getSessionService().executeInLocalView(new SessionExecutionBody()
+			{
 
-			LOGGER.info("PRODUCTMODEL CODE:" + productmodel.getCode());
-			LOGGER.info("PRODUCTMODEL:" + productmodel.getCode());
-			productmodel.setAnnotation(annotation);
-			productmodel.setThreeDimensionalImage(mediaModel);
-			modelService.save(productmodel);
+				@Override
+				public Object execute()
+				{
+					try
+					{
+						getSearchRestrictionService().disableSearchRestrictions();
 
-			final Ceea3DImageSubmitEvent event = new Ceea3DImageSubmitEvent(productmodel);
+						return productService.getProductForCode(code);
+
+					}
+
+					catch (final Exception e)
+					{
+						return null;
+					}
+					finally
+					{
+						getSearchRestrictionService().enableSearchRestrictions();
+
+					}
+				}
+
+			});
+
+		}
+		catch (final UnknownIdentifierException e)
+		{
+			e.printStackTrace();
+		}
+		catch (final IOException e1)
+		{
+			e1.printStackTrace();
+		}
+		//final ProductModel productmodel = productService.getProductForCode(code);
+		if (searchProduct != null)
+		{
+			LOGGER.info("PRODUCTMODEL CODE:" + searchProduct.getCode());
+			LOGGER.info("PRODUCTMODEL:" + searchProduct.getCode());
+			searchProduct.setAnnotation(annotation);
+			searchProduct.setThreeDimensionalImage(mediaModel);
+			modelService.save(searchProduct);
+
+			final Ceea3DImageSubmitEvent event = new Ceea3DImageSubmitEvent(searchProduct);
 			this.eventService.publishEvent(event);
 
 
-			return "File saved Successfully";
-
+			return "3D image saved Successfully";
 		}
-		catch (final Exception e)
+		else
 		{
 
-			e.printStackTrace();
-
+			return "Unable to upload 3D image";
 		}
-		return "Unable to save file";
 	}
 
 	@Override
-	public String setProduct3DImageAndAnnotationByCode(final String code, final MultipartFile file,
-			final AnnotationData annotation)
+	public String setProduct3DImageAndAnnotationByCode(final String code, final MultipartFile file)
 	{
 
+		ProductModel searchProduct = null;
+		MediaModel mediaModel = null;
 		try (final InputStream inputStream = file.getInputStream())
 		{
-			final MediaModel mediaModel = modelService.create(MediaModel.class);
+			mediaModel = modelService.create(MediaModel.class);
 
 			mediaModel.setCode(code + "-" + System.currentTimeMillis());
 			mediaModel.setRealFileName(file.getOriginalFilename());
@@ -236,42 +287,61 @@ public class Upload3DImageProductServiceImpl implements Upload3DImageProductServ
 			modelService.save(mediaModel);
 			modelService.refresh(mediaModel);
 
-			final ProductModel productmodel = productService.getProductForCode(code);
-
-			LOGGER.info("PRODUCTMODEL CODE:" + productmodel.getCode());
-			LOGGER.info("PRODUCTMODEL:" + productmodel.getCode());
-			final ObjectMapper mapper = new ObjectMapper();
-			final AnnotationData annotationData = new AnnotationData();
-			annotationData.setHotspotId(annotation.getHotspotId());
-			annotationData.setTransform(annotation.getTransform());
-			annotationData.setRotation(annotation.getRotation());
-			annotationData.setScale(annotation.getScale());
-			annotationData.setText(annotation.getText());
-			try
+			searchProduct = getSessionService().executeInLocalView(new SessionExecutionBody()
 			{
-				productmodel.setAnnotation(mapper.writeValueAsString(annotationData));
-			}
-			catch (final JsonProcessingException e)
-			{
-				e.printStackTrace();
-			}
-			productmodel.setThreeDimensionalImage(mediaModel);
-			modelService.save(productmodel);
 
-			final Ceea3DImageSubmitEvent event = new Ceea3DImageSubmitEvent(productmodel);
+				@Override
+				public Object execute()
+				{
+					try
+					{
+						getSearchRestrictionService().disableSearchRestrictions();
+
+						return productService.getProductForCode(code);
+
+					}
+
+					catch (final Exception e)
+					{
+						return null;
+					}
+					finally
+					{
+						getSearchRestrictionService().enableSearchRestrictions();
+
+					}
+				}
+
+			});
+
+		}
+		catch (final UnknownIdentifierException e)
+		{
+			e.printStackTrace();
+		}
+		catch (final IOException e1)
+		{
+			e1.printStackTrace();
+		}
+		//final ProductModel productmodel = productService.getProductForCode(code);
+		if (searchProduct != null)
+		{
+			LOGGER.info("PRODUCTMODEL CODE:" + searchProduct.getCode());
+			LOGGER.info("PRODUCTMODEL:" + searchProduct.getCode());
+			searchProduct.setThreeDimensionalImage(mediaModel);
+			modelService.save(searchProduct);
+
+			final Ceea3DImageSubmitEvent event = new Ceea3DImageSubmitEvent(searchProduct);
 			this.eventService.publishEvent(event);
 
 
-			return "File saved Successfully";
-
+			return "3D image saved Successfully";
 		}
-		catch (final Exception e)
+		else
 		{
 
-			e.printStackTrace();
-
+			return "Unable to upload 3D image";
 		}
-		return "Unable to save file";
 	}
 
 
@@ -279,11 +349,12 @@ public class Upload3DImageProductServiceImpl implements Upload3DImageProductServ
 	@Override
 	public String setProduct2DImageByCode(final String code, final MultipartFile file)
 	{
-
+		ProductModel productModel = null;
+		MediaModel mediaModel = null;
 		//final CatalogVersionModel catalogVersion = catalogVersionService.getCatalogVersion("apparelProductCatalog", "STAGED");
 		try
 		{
-			final MediaModel mediaModel = modelService.create(MediaModel.class);
+			mediaModel = modelService.create(MediaModel.class);
 			mediaModel.setCode(code + "-" + System.currentTimeMillis());
 			mediaModel.setRealfilename(file.getOriginalFilename());
 			mediaModel.setMime(file.getContentType());
@@ -293,34 +364,56 @@ public class Upload3DImageProductServiceImpl implements Upload3DImageProductServ
 			mediaService.setStreamForMedia(mediaModel, file.getInputStream());
 			modelService.refresh(mediaModel);
 
-			final ProductModel productModel = productService.getProductForCode(code);
 
-			productModel.setPicture(mediaModel);
-			modelService.save(productModel);
+			productModel = getSessionService().executeInLocalView(new SessionExecutionBody()
+			{
 
-			return "Image Saved Successfully";
+				@Override
+				public Object execute()
+				{
+					try
+					{
+						getSearchRestrictionService().disableSearchRestrictions();
+
+						return productService.getProductForCode(code);
+
+					}
+
+					catch (final Exception e)
+					{
+						return null;
+					}
+					finally
+					{
+						getSearchRestrictionService().enableSearchRestrictions();
+
+					}
+				}
+
+			});
 
 		}
-		catch (final Exception e)
+		catch (final UnknownIdentifierException e)
 		{
 			e.printStackTrace();
 		}
-		return "Unable to upload image";
-	}
+		catch (final IOException e1)
+		{
+			e1.printStackTrace();
+		}
+		if (productModel != null)
+		{
+			productModel.setPicture(mediaModel);
+			modelService.save(productModel);
 
+			return "2d Image Saved Successfully";
 
+		}
+		else
+		{
 
-	public ProductModel getProductForCode(final CatalogVersionModel catalogVersion, final String code)
-	{
-		final List<ProductModel> products = getCustomProductDao().findProductsByCode(catalogVersion, code);
-
-		validateIfSingleResult(products,
-				format("Product with code '%s' and CatalogVersion '%s.%s' not found!", code, catalogVersion.getCatalog().getId(),
-						catalogVersion.getVersion()),
-				format("Code '%s' and CatalogVersion '%s.%s' are not unique. %d products found!", code,
-						catalogVersion.getCatalog().getId(), catalogVersion.getVersion(), Integer.valueOf(products.size())));
-
-		return products.get(0);
+			return "Unable to upload 2d image";
+		}
 	}
 
 
